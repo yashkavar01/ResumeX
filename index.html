@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeX — AI Resume Analyzer & Talent Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============================================================
+     LANDING PAGE
+============================================================ -->
+<div id="page-landing" class="page active">
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <span class="logo-icon">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="1" y="1" width="9" height="9" rx="2" fill="#6366f1"/>
+            <rect x="12" y="1" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/>
+            <rect x="1" y="12" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/>
+            <rect x="12" y="12" width="9" height="9" rx="2" fill="#6366f1" opacity="0.5"/>
+          </svg>
+        </span>
+        ResumeX
+      </div>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="btn-ghost" onclick="showPage('login')">Login</button>
+        <button class="btn-primary" onclick="showPage('login')">Get Started <span class="arrow">→</span></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        AI-Powered Platform · Trusted by 50,000+ Professionals
+      </div>
+      <h1 class="hero-headline">
+        AI Resume Analyzer<br/>&amp; <span class="gradient-text">Talent Intelligence</span><br/>Platform
+      </h1>
+      <p class="hero-sub">
+        Analyze resumes, discover talent, and match candidates with the right
+        opportunities using cutting-edge AI that understands context, not just keywords.
+      </p>
+      <div class="hero-cta">
+        <button class="btn-primary btn-lg" onclick="showPage('login')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1v6M8 1l-3 3M8 1l3 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="2" y="9" width="12" height="5" rx="1.5" stroke="#fff" stroke-width="1.5"/></svg>
+          Upload Resume
+        </button>
+        <button class="btn-outline btn-lg" onclick="showPage('login')">
+          Try Demo
+          <span class="arrow">→</span>
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>98%</strong><span>ATS Accuracy</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><strong>50K+</strong><span>Resumes Analyzed</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><strong>2.3K+</strong><span>Companies</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="dashboard-preview">
+        <div class="preview-header">
+          <div class="preview-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <span class="preview-title">Resume Analysis</span>
+        </div>
+        <div class="preview-body">
+          <div class="preview-score-ring">
+            <svg viewBox="0 0 120 120" class="ring-svg">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#1e293b" stroke-width="10"/>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="url(#scoreGrad)" stroke-width="10"
+                stroke-dasharray="251" stroke-dashoffset="50" stroke-linecap="round"
+                transform="rotate(-90 60 60)"/>
+              <defs>
+                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#6366f1"/>
+                  <stop offset="100%" stop-color="#22c55e"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="ring-label"><span class="ring-score">87</span><span class="ring-sub">Score</span></div>
+          </div>
+          <div class="preview-skills">
+            <span class="preview-tag">Python</span>
+            <span class="preview-tag">ML</span>
+            <span class="preview-tag green">React</span>
+            <span class="preview-tag">Node.js</span>
+            <span class="preview-tag green">SQL</span>
+          </div>
+          <div class="preview-bars">
+            <div class="pbar-row"><span>ATS Score</span><div class="pbar"><div class="pbar-fill" style="width:92%"></div></div><span>92%</span></div>
+            <div class="pbar-row"><span>Keywords</span><div class="pbar"><div class="pbar-fill amber" style="width:74%"></div></div><span>74%</span></div>
+            <div class="pbar-row"><span>Format</span><div class="pbar"><div class="pbar-fill green" style="width:88%"></div></div><span>88%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="section-header">
+      <div class="section-label">Features</div>
+      <h2>Everything you need to <span class="gradient-text">land your dream role</span></h2>
+      <p>From AI-powered analysis to smart talent discovery — ResumeX covers the full hiring lifecycle.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon" style="--c:#6366f1">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2a9 9 0 100 18A9 9 0 0011 2z" stroke="#6366f1" stroke-width="1.5"/><path d="M11 7v4l3 3" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3>AI Resume Analysis</h3>
+        <p>Deep semantic analysis of your resume — skills extraction, gap identification, and improvement recommendations powered by LLMs.</p>
+        <div class="feat-tag">GPT-4 Powered</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="--c:#22c55e">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="3" stroke="#22c55e" stroke-width="1.5"/><path d="M7 11l3 3 5-5" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Company-Specific Optimization</h3>
+        <p>Tailor your resume for Google, Meta, or any company. Our AI aligns your profile with specific job descriptions and company culture.</p>
+        <div class="feat-tag green">Smart Matching</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="--c:#f59e0b">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 8h16M3 14h16M8 3v16M14 3v16" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Smart Job Matching</h3>
+        <p>Receive curated job recommendations with match scores. Know exactly why you're a fit — and what to improve to get there.</p>
+        <div class="feat-tag amber">Real-Time</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="--c:#ec4899">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="8" cy="7" r="3" stroke="#ec4899" stroke-width="1.5"/><circle cx="14" cy="7" r="3" stroke="#ec4899" stroke-width="1.5"/><path d="M2 19c0-3.314 2.686-6 6-6h6c3.314 0 6 2.686 6 6" stroke="#ec4899" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Recruiter Talent Search</h3>
+        <p>HR teams can search, filter, and shortlist candidates with precision. Boolean search meets AI-powered ranking for zero hiring noise.</p>
+        <div class="feat-tag pink">For Recruiters</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="section-header">
+      <div class="section-label">How It Works</div>
+      <h2>From upload to <span class="gradient-text">opportunity</span> in minutes</h2>
+    </div>
+    <div class="steps-container">
+      <div class="step-connector"></div>
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <h3>Upload Resume</h3>
+          <p>Drag and drop your PDF or Word resume. We support all modern formats and parse them with 99.4% accuracy.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <h3>AI Analyzes Skills</h3>
+          <p>Our LLM pipeline extracts skills, experiences, and gaps — then benchmarks your profile against thousands of job listings.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <h3>Get Job Matches</h3>
+          <p>Receive personalized job recommendations with detailed match scores, improvement tips, and one-click applications.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA SECTION -->
+  <section class="cta-section">
+    <div class="cta-bg">
+      <div class="orb orb-cta-1"></div>
+      <div class="orb orb-cta-2"></div>
+    </div>
+    <div class="cta-content">
+      <h2>Ready to land your<br/><span class="gradient-text">dream job?</span></h2>
+      <p>Join 50,000+ professionals who trust ResumeX to accelerate their careers.</p>
+      <div class="cta-actions">
+        <button class="btn-primary btn-lg" onclick="showPage('login')">Start Free — No Card Required</button>
+        <button class="btn-ghost" onclick="showPage('login')">Talk to Sales →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="nav-logo">
+          <span class="logo-icon">
+            <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+              <rect x="1" y="1" width="9" height="9" rx="2" fill="#6366f1"/>
+              <rect x="12" y="1" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/>
+              <rect x="1" y="12" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/>
+              <rect x="12" y="12" width="9" height="9" rx="2" fill="#6366f1" opacity="0.5"/>
+            </svg>
+          </span>
+          ResumeX
+        </div>
+        <p>AI-powered resume analysis and talent intelligence for the modern hiring era.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="#">Features</a>
+          <a href="#">Pricing</a>
+          <a href="#">API</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="#">About</a>
+          <a href="#">Blog</a>
+          <a href="#">Careers</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Security</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 ResumeX Inc. All rights reserved.</span>
+      <span>Built with ♥ for job seekers everywhere</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     LOGIN PAGE
+============================================================ -->
+<div id="page-login" class="page">
+  <div class="auth-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="grid-overlay"></div>
+  </div>
+  <div class="auth-container">
+    <div class="auth-brand" onclick="showPage('landing')" style="cursor:pointer">
+      <span class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+          <rect x="1" y="1" width="9" height="9" rx="2" fill="#6366f1"/>
+          <rect x="12" y="1" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/>
+          <rect x="1" y="12" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/>
+          <rect x="12" y="12" width="9" height="9" rx="2" fill="#6366f1" opacity="0.5"/>
+        </svg>
+      </span>
+      ResumeX
+    </div>
+    <div class="auth-card glass-card">
+      <div class="auth-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to your ResumeX account</p>
+      </div>
+      <div class="role-selector">
+        <button class="role-btn active" data-role="student" onclick="selectRole(this)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Student
+        </button>
+        <button class="role-btn" data-role="hr" onclick="selectRole(this)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 8h6M5 5h6M5 11h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          HR / Recruiter
+        </button>
+        <button class="role-btn" data-role="admin" onclick="selectRole(this)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Admin
+        </button>
+      </div>
+      
+      <div id="login-form-section" class="auth-form">
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrap">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="#94a3b8" stroke-width="1.3"/><path d="M1 6l7 4 7-4" stroke="#94a3b8" stroke-width="1.3"/></svg>
+            <input type="email" placeholder="you@company.com" id="login-email" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password <a href="#" class="forgot">Forgot?</a></label>
+          <div class="input-wrap">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#94a3b8" stroke-width="1.3"/><path d="M5 7V5a3 3 0 016 0v2" stroke="#94a3b8" stroke-width="1.3"/></svg>
+            <input type="password" placeholder="••••••••••" id="login-pass" />
+          </div>
+        </div>
+        <p id="login-error" style="color: red; display: none; font-size: 0.85rem; margin-bottom: 10px;"></p>
+        <button class="btn-primary btn-full" onclick="handleAuth('login')">
+          Sign In
+          <span class="arrow">→</span>
+        </button>
+        <div class="auth-divider"><span>or</span></div>
+        <button class="btn-outline btn-full" onclick="toggleAuthMode('register')">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 1.5A6.5 6.5 0 1114.5 8 6.507 6.507 0 018 1.5z" fill="none" stroke="#94a3b8" stroke-width="1.3"/><path d="M5.5 8h5M8 5.5v5" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Create Account
+        </button>
+      </div>
+
+      <div id="register-form-section" class="auth-form" style="display:none;">
+        <div class="form-group">
+          <label>Full Name</label>
+          <div class="input-wrap">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#94a3b8" stroke-width="1.3"/><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="text" placeholder="John Doe" id="register-name" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrap">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="#94a3b8" stroke-width="1.3"/><path d="M1 6l7 4 7-4" stroke="#94a3b8" stroke-width="1.3"/></svg>
+            <input type="email" placeholder="you@company.com" id="register-email" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrap">
+            <input type="password" placeholder="••••••••••" id="register-pass" />
+          </div>
+        </div>
+
+        <!-- HR EXCLUSIVE FIELDS -->
+        <div id="hr-registration-fields" style="display:none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1);">
+          <div style="font-size: 0.8rem; color: #6366f1; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">Verification Details</div>
+          <div class="form-group">
+            <label>Company Name</label>
+            <div class="input-wrap">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 14h14M3 14V3a1 1 0 011-1h6a1 1 0 011 1v11" stroke="#94a3b8" stroke-width="1.3"/><path d="M14 14V7h-3" stroke="#94a3b8" stroke-width="1.3"/><path d="M5 5h2M5 8h2M5 11h2" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"/></svg>
+              <input type="text" placeholder="e.g. Google" id="register-company" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>LinkedIn URL</label>
+            <div class="input-wrap">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4h8v8H4V4z" stroke="#94a3b8" stroke-width="1.3"/><path d="M6 9v2M6 7v1M9 7v4M9 7a1.5 1.5 0 113 0v4" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"/></svg>
+              <input type="url" placeholder="https://linkedin.com/in/..." id="register-linkedin" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Position / Title</label>
+            <div class="input-wrap">
+              <input type="text" placeholder="e.g. Talent Acquisition" id="register-position" />
+            </div>
+          </div>
+        </div>
+        <p id="register-error" style="color: red; display: none; font-size: 0.85rem; margin-bottom: 10px;"></p>
+        <button class="btn-primary btn-full" onclick="handleAuth('register')">
+          Create Account
+          <span class="arrow">→</span>
+        </button>
+        <div class="auth-divider"><span>or</span></div>
+        <button class="btn-outline btn-full" onclick="toggleAuthMode('login')">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 1a5 5 0 014.9 5.9L14 13H2l1.1-6.1A5 5 0 018 1z" stroke="#94a3b8" stroke-width="1.3"/><path d="M6 13a2 2 0 004 0" stroke="#94a3b8" stroke-width="1.3"/></svg>
+          Back to Login
+        </button>
+      </div>
+    </div>
+    <p class="auth-footer-note">By continuing you agree to ResumeX <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
+  </div>
+</div>
+
+<!-- ============================================================
+     USER DASHBOARD
+============================================================ -->
+<div id="page-dashboard" class="page">
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+            <rect x="1" y="1" width="9" height="9" rx="2" fill="#6366f1"/>
+            <rect x="12" y="1" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/>
+            <rect x="1" y="12" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/>
+            <rect x="12" y="12" width="9" height="9" rx="2" fill="#6366f1" opacity="0.5"/>
+          </svg>
+        </span>
+        ResumeX
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a class="sidebar-link active" data-tab="overview">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+          Dashboard
+        </a>
+        <a class="sidebar-link" data-tab="analyzer">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 5h6M5 8h4M5 11h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Resume Analyzer
+          <span class="sidebar-badge">New</span>
+        </a>
+        <a class="sidebar-link" data-tab="optimizer">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Company Optimizer
+        </a>
+        <a class="sidebar-link" data-tab="jobs">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="5" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 5V4a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.4"/></svg>
+          Job Matches
+          <span class="sidebar-badge green">5</span>
+        </a>
+        <div class="nav-section-label">Account</div>
+        <a class="sidebar-link" data-tab="profile">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Profile
+        </a>
+        <a class="sidebar-link" onclick="logout()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3l-5 5 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Logout
+        </a>
+      </nav>
+      <div class="sidebar-user">
+        <div class="user-avatar">AK</div>
+        <div class="user-info"><strong>Arjun Kumar</strong><span>Student</span></div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <!-- TOP NAVBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="topbar-title" id="topbar-title">Dashboard</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="search-bar">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="#94a3b8" stroke-width="1.3"/><path d="M10 10l2.5 2.5" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="text" placeholder="Search anything..." />
+          </div>
+          <button class="icon-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1a5 5 0 014.9 5.9L14 13H2l1.1-6.1A5 5 0 018 1z" stroke="#94a3b8" stroke-width="1.3"/><path d="M6 13a2 2 0 004 0" stroke="#94a3b8" stroke-width="1.3"/></svg>
+            <span class="notif-dot"></span>
+          </button>
+          <div class="user-avatar sm">AK</div>
+        </div>
+      </header>
+
+      <!-- VIEWS -->
+      <div class="view-container">
+
+        <!-- OVERVIEW VIEW -->
+        <div id="view-overview" class="view active">
+          <div class="welcome-banner">
+            <div>
+              <h2>Good morning, <span id="student-name-dash">Student</span> 👋</h2>
+              <p>Your resume score improved by 12 points this week. Keep going!</p>
+            </div>
+            <button class="btn-primary" onclick="switchTab('analyzer')">
+              Analyze Resume →
+            </button>
+          </div>
+
+          <div id="student-notifications-container" class="audit-section" style="margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h3 style="margin: 0;">🔔 Latest Updates</h3>
+              <button class="btn-outline btn-sm" onclick="loadNotifications()">Refresh</button>
+            </div>
+            <div id="student-notifications-list" class="rewrites-container">
+              <!-- Notifications will be injected here -->
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span>Resume Score</span>
+                <div class="stat-icon" style="--sc:#6366f1">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="#6366f1" stroke-width="1.3"/><path d="M7 4v3l2 2" stroke="#6366f1" stroke-width="1.3" stroke-linecap="round"/></svg>
+                </div>
+              </div>
+              <div class="stat-value">87<span>/100</span></div>
+              <div class="stat-change positive">↑ 12 pts this week</div>
+              <div class="mini-progress"><div class="mini-fill" style="width:87%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div>
+            </div>
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span>ATS Score</span>
+                <div class="stat-icon" style="--sc:#22c55e">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="2" stroke="#22c55e" stroke-width="1.3"/><path d="M4 7l2 2 4-4" stroke="#22c55e" stroke-width="1.3" stroke-linecap="round"/></svg>
+                </div>
+              </div>
+              <div class="stat-value">92<span>%</span></div>
+              <div class="stat-change positive">↑ 8% this week</div>
+              <div class="mini-progress"><div class="mini-fill" style="width:92%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div></div>
+            </div>
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span>Skills Detected</span>
+                <div class="stat-icon" style="--sc:#f59e0b">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5L12 5l-2.5 2.5.5 3.5L7 9.5 4 11l.5-3.5L2 5l3.5-.5z" stroke="#f59e0b" stroke-width="1.3"/></svg>
+                </div>
+              </div>
+              <div class="stat-value">14<span> skills</span></div>
+              <div class="stat-change positive">↑ 3 new this month</div>
+              <div class="mini-progress"><div class="mini-fill" style="width:70%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+            </div>
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span>Job Matches</span>
+                <div class="stat-icon" style="--sc:#ec4899">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="5" width="10" height="7" rx="1.5" stroke="#ec4899" stroke-width="1.3"/><path d="M4.5 5V4a2.5 2.5 0 015 0v1" stroke="#ec4899" stroke-width="1.3"/></svg>
+                </div>
+              </div>
+              <div class="stat-value">24<span> jobs</span></div>
+              <div class="stat-change positive">↑ 5 new today</div>
+              <div class="mini-progress"><div class="mini-fill" style="width:60%;background:linear-gradient(90deg,#ec4899,#f472b6)"></div></div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="glass-card skills-card">
+              <div class="card-header">
+                <h3>Skills Profile</h3>
+                <span class="card-badge">14 detected</span>
+              </div>
+              <div class="skills-section">
+                <div class="skills-label">Strong Skills</div>
+                <div class="tags-wrap">
+                  <span class="tag tag-green">Python</span>
+                  <span class="tag tag-green">Machine Learning</span>
+                  <span class="tag tag-green">React</span>
+                  <span class="tag tag-green">SQL</span>
+                  <span class="tag tag-green">Data Analysis</span>
+                  <span class="tag tag-blue">Node.js</span>
+                  <span class="tag tag-blue">TensorFlow</span>
+                </div>
+              </div>
+              <div class="skills-section mt-12">
+                <div class="skills-label missing">Missing Skills</div>
+                <div class="tags-wrap">
+                  <span class="tag tag-red">Kubernetes</span>
+                  <span class="tag tag-red">AWS</span>
+                  <span class="tag tag-amber">Docker</span>
+                  <span class="tag tag-amber">GraphQL</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass-card progress-card">
+              <div class="card-header">
+                <h3>Resume Health</h3>
+              </div>
+              <div class="progress-list">
+                <div class="prog-item">
+                  <div class="prog-header"><span>ATS Compatibility</span><span class="prog-val">92%</span></div>
+                  <div class="prog-bar"><div class="prog-fill" data-width="92" style="background:linear-gradient(90deg,#22c55e,#4ade80)"></div></div>
+                </div>
+                <div class="prog-item">
+                  <div class="prog-header"><span>Keyword Density</span><span class="prog-val">74%</span></div>
+                  <div class="prog-bar"><div class="prog-fill" data-width="74" style="background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+                </div>
+                <div class="prog-item">
+                  <div class="prog-header"><span>Formatting Score</span><span class="prog-val">88%</span></div>
+                  <div class="prog-bar"><div class="prog-fill" data-width="88" style="background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div>
+                </div>
+                <div class="prog-item">
+                  <div class="prog-header"><span>Skills Coverage</span><span class="prog-val">65%</span></div>
+                  <div class="prog-bar"><div class="prog-fill" data-width="65" style="background:linear-gradient(90deg,#ec4899,#f472b6)"></div></div>
+                </div>
+                <div class="prog-item">
+                  <div class="prog-header"><span>Experience Relevance</span><span class="prog-val">81%</span></div>
+                  <div class="prog-bar"><div class="prog-fill" data-width="81" style="background:linear-gradient(90deg,#06b6d4,#67e8f9)"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass-card jobs-mini-card">
+              <div class="card-header">
+                <h3>Recommended Jobs</h3>
+                <a class="card-link" onclick="switchView('jobs', document.querySelector('[data-view=jobs]'))">View all →</a>
+              </div>
+              <div class="job-mini-list">
+                <div class="job-mini-item">
+                  <div class="job-mini-logo" style="background:#1e293b;color:#6366f1">G</div>
+                  <div class="job-mini-info"><strong>ML Engineer</strong><span>Google · Remote</span></div>
+                  <div class="match-badge high">94%</div>
+                </div>
+                <div class="job-mini-item">
+                  <div class="job-mini-logo" style="background:#1e293b;color:#22c55e">M</div>
+                  <div class="job-mini-info"><strong>Data Scientist</strong><span>Meta · Hyderabad</span></div>
+                  <div class="match-badge mid">87%</div>
+                </div>
+                <div class="job-mini-item">
+                  <div class="job-mini-logo" style="background:#1e293b;color:#f59e0b">A</div>
+                  <div class="job-mini-info"><strong>SDE II</strong><span>Amazon · Bangalore</span></div>
+                  <div class="match-badge mid">82%</div>
+                </div>
+                <div class="job-mini-item">
+                  <div class="job-mini-logo" style="background:#1e293b;color:#ec4899">N</div>
+                  <div class="job-mini-info"><strong>AI/ML Intern</strong><span>Netflix · Remote</span></div>
+                  <div class="match-badge low">71%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ANALYZER VIEW -->
+        <div id="view-analyzer" class="view">
+          <div class="view-header">
+            <h2>Resume Analyzer</h2>
+            <p>Upload your resume and get AI-powered feedback in seconds.</p>
+          </div>
+          <div class="analyzer-layout">
+            <div class="glass-card upload-card">
+              <div class="upload-zone" id="upload-zone" onclick="openFilePicker()">
+                <input type="file" id="resumeFile" accept=".pdf,.docx,.txt" style="display:none" />
+                <div class="upload-icon">
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M20 26V14M14 20l6-6 6 6" stroke="#6366f1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <p><strong>Drop your resume here</strong></p>
+                <p class="upload-hint">PDF, DOCX, TXT — Max 5MB</p>
+                <button class="btn-primary" style="margin-top:12px" type="button" onclick="openFilePicker()">Browse Files</button>
+              </div>
+              <div class="upload-actions" style="margin:12px 0; text-align:center;">
+                <button class="btn-primary" id="analyze-btn" type="button" onclick="analyzeResume()">Analyze Resume</button>
+              </div>
+              <div class="upload-result" id="upload-result" style="display:none">
+                <div class="file-item">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="#6366f1" stroke-width="1.5"/><path d="M8 7h8M8 11h8M8 15h5" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  <span id="display-filename">Arjun_Kumar_Resume.pdf</span>
+                  <span class="file-size" id="display-filesize">248 KB</span>
+                  <button class="btn-ghost" style="margin-left:auto; color:#ef4444; padding:4px 8px; font-size:12px;" onclick="cancelSelection()">Remove</button>
+                </div>
+                <div class="analyzing-bar" id="analyzing-bar">
+                  <div class="analyze-progress"></div>
+                </div>
+                <p class="analyze-status" id="analyze-status">Analyzing with AI...</p>
+              </div>
+            </div>
+
+            <div class="glass-card analysis-result" id="analysis-result" style="display:none; margin-top:20px;">
+              <!-- Top Level Stats Core -->
+              <div class="stats-header" style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px;">
+                <div class="stat-box primary">
+                  <h4>ATS Score</h4>
+                  <h2 class="big-num" id="audit-score">0</h2>
+                </div>
+                <div class="stat-box">
+                  <h4>Fluff vs Impact</h4>
+                  <p id="audit-fluff" class="text-xs" style="color:#e2e8f0"></p>
+                </div>
+              </div>
+
+              <div class="skills-section" style="margin-top:12px; margin-bottom:20px;">
+                <div class="skills-label">Detected Skills</div>
+                <div class="tags-wrap" id="analysis-tags"></div>
+              </div>
+
+              <!-- Flags and Strengths Grid -->
+              <div class="audit-grid">
+                <div class="audit-card red-flags">
+                  <h3>🚨 Critical Red Flags</h3>
+                  <ul id="audit-red-flags"></ul>
+                </div>
+                
+                <div class="audit-card strengths">
+                  <h3>⭐ Key Strengths</h3>
+                  <ul id="audit-strengths"></ul>
+                </div>
+              </div>
+
+              <!-- Bullet Point Rewrite Viewer -->
+              <div class="audit-section">
+                <h3>✍️ Suggested Bullet Point Rewrites</h3>
+                <div id="audit-rewrites" class="rewrites-container"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OPTIMIZER VIEW -->
+        <div id="view-optimizer" class="view">
+          <div class="view-header">
+            <h2>Company-Specific Optimizer</h2>
+            <p>Tailor your resume for any company or job description.</p>
+          </div>
+          <div class="optimizer-layout">
+            <div class="glass-card">
+              <div class="card-header"><h3>Select Target Company</h3></div>
+              <div class="company-grid">
+                <div class="company-tile active-tile" onclick="selectCompany(this)">
+                  <span style="color:#4285F4;font-size:20px;font-weight:800">G</span>Google
+                </div>
+                <div class="company-tile" onclick="selectCompany(this)">
+                  <span style="color:#1877F2;font-size:20px;font-weight:800">M</span>Meta
+                </div>
+                <div class="company-tile" onclick="selectCompany(this)">
+                  <span style="color:#FF9900;font-size:20px;font-weight:800">A</span>Amazon
+                </div>
+                <div class="company-tile" onclick="selectCompany(this)">
+                  <span style="color:#0078D4;font-size:20px;font-weight:800">M</span>Microsoft
+                </div>
+                <div class="company-tile" onclick="selectCompany(this)">
+                  <span style="color:#E50914;font-size:20px;font-weight:800">N</span>Netflix
+                </div>
+                <div class="company-tile" onclick="selectCompany(this)">
+                  <span style="color:#00B2FF;font-size:20px;font-weight:800">A</span>Apple
+                </div>
+              </div>
+              <div class="form-group" style="margin-top:20px">
+                <label>Job Description (optional)</label>
+                <textarea class="text-area" placeholder="Paste the job description here for more precise optimization..."></textarea>
+              </div>
+              <button class="btn-primary" style="margin-top:12px" onclick="runOptimizer()">Optimize Resume →</button>
+            </div>
+            <div class="glass-card optimizer-result" id="optimizer-result" style="display:none">
+              <div class="card-header"><h3>Optimization Suggestions</h3><span class="card-badge">For Google</span></div>
+              <div class="opt-list">
+                <div class="opt-item high-priority"><span class="opt-priority">High</span><p>Add <strong>GCP / BigQuery</strong> experience — heavily prioritized in Google's ML roles</p></div>
+                <div class="opt-item high-priority"><span class="opt-priority">High</span><p>Highlight <strong>large-scale distributed systems</strong> projects with metrics</p></div>
+                <div class="opt-item med-priority"><span class="opt-priority">Med</span><p>Include <strong>open source contributions</strong> — Google values community involvement</p></div>
+                <div class="opt-item med-priority"><span class="opt-priority">Med</span><p>Quantify your ML model performance improvements with specific numbers</p></div>
+                <div class="opt-item low-priority"><span class="opt-priority">Low</span><p>Add a <strong>Publications / Research</strong> section if applicable</p></div>
+              </div>
+              <div class="match-score-bar">
+                <span>Current Match</span>
+                <div class="prog-bar"><div class="prog-fill" style="width:68%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+                <span>68%</span>
+              </div>
+              <div class="match-score-bar">
+                <span>After Optimization</span>
+                <div class="prog-bar"><div class="prog-fill" style="width:91%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div></div>
+                <span>91%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STUDENT JOB BOARD VIEW -->
+        <div id="view-jobs" class="view">
+          <div class="view-header">
+            <h2>Job Board</h2>
+            <p>Discover open roles and dynamically tailor your resume to match them using AI.</p>
+          </div>
+          
+          <div class="jobs-grid" id="student-jobs-container">
+            <p class="muted">Loading available jobs...</p>
+          </div>
+        </div>
+
+        <!-- 1-CLICK AI TAILOR MODAL -->
+        <div id="ai-tailor-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; justify-content:center; align-items:center;">
+          <div class="modal-content glass-card" style="width: 600px; max-height: 80vh; overflow-y: auto; padding: 30px;">
+            <h2 id="ai-modal-title" style="margin-bottom: 20px;">🤖 AI is tailoring your resume...</h2>
+            
+            <div id="ai-modal-results" style="display:none;">
+              <h3 style="color:#4ade80;">Tailored Summary</h3>
+              <p id="ai-tailored-summary" style="font-style: italic; margin-bottom: 20px;"></p>
+              
+              <h3 style="color:#6366f1;">Bullet Point Replacements</h3>
+              <div id="ai-tweaked-bullets" class="rewrites-container"></div>
+            </div>
+
+            <button class="btn-ghost" style="margin-top:20px; width:100%" onclick="document.getElementById('ai-tailor-modal').style.display='none'">Close</button>
+          </div>
+        </div>
+
+        <!-- PROFILE VIEW -->
+        <div id="view-profile" class="view">
+          <div class="view-header"><h2>Profile</h2><p>Manage your personal information and preferences.</p></div>
+          <div class="profile-layout">
+            <div class="glass-card profile-card">
+              <div class="profile-avatar-section">
+                <div class="profile-avatar">AK</div>
+                <div>
+                  <h3 id="prof-display-name">Arjun Kumar</h3>
+                  <p class="muted" id="prof-display-email">arjun.kumar@example.com</p>
+                  <span class="tag tag-blue" id="prof-display-role" style="margin-top:6px;display:inline-block">Student</span>
+                </div>
+              </div>
+              <div class="form-row" style="display:flex; gap:16px;">
+                <div class="form-group" style="flex:1"><label>First Name</label><div class="input-wrap"><input type="text" id="prof-firstname" /></div></div>
+                <div class="form-group" style="flex:1"><label>Last Name</label><div class="input-wrap"><input type="text" id="prof-lastname" /></div></div>
+              </div>
+              <div class="form-group"><label>Email Address</label><div class="input-wrap"><input type="email" id="prof-email" readonly disabled style="background: rgba(255,255,255,0.05); color: #94a3b8; cursor: not-allowed;"/></div></div>
+              <div class="form-row" style="display:flex; gap:16px;">
+                <div class="form-group" style="flex:1"><label>Phone</label><div class="input-wrap"><input type="tel" id="prof-phone" /></div></div>
+                <div class="form-group" style="flex:1"><label>Location / Address</label><div class="input-wrap"><input type="text" id="prof-location" /></div></div>
+              </div>
+
+              <div class="form-group" style="margin-top:20px"><h4 style="margin-bottom:12px; color: #fff;">Education & Qualifications</h4></div>
+              <div class="form-row" style="display:flex; gap:16px;">
+                <div class="form-group" style="flex:1"><label>Qualification</label><div class="input-wrap"><input type="text" id="prof-qualification" placeholder="e.g. B.Tech Computer Science" /></div></div>
+                <div class="form-group" style="flex:1"><label>University</label><div class="input-wrap"><input type="text" id="prof-university" placeholder="e.g. Stanford University" /></div></div>
+              </div>
+              <div class="form-row" style="display:flex; gap:16px;">
+                <div class="form-group" style="flex:1"><label>Experience (Years)</label><div class="input-wrap"><input type="number" id="prof-experience" min="0" placeholder="0" /></div></div>
+                <div class="form-group" style="flex:1"><label>Expected Salary</label><div class="input-wrap"><input type="text" id="prof-salary" placeholder="e.g. $100,000 / year" /></div></div>
+              </div>
+
+              <div class="form-group" style="margin-top:20px"><h4 style="margin-bottom:12px; color: #fff;">Professional Links</h4></div>
+              <div class="form-group"><label>Bio / Headline</label><textarea class="text-area" id="prof-bio" placeholder="Software Engineer passionate about building scalable backends..."></textarea></div>
+              <div class="form-group"><label>LinkedIn URL</label><div class="input-wrap"><input type="url" id="prof-linkedin" placeholder="https://linkedin.com/in/username" /></div></div>
+              <div class="form-group"><label>GitHub URL</label><div class="input-wrap"><input type="url" id="prof-github" placeholder="https://github.com/username" /></div></div>
+              <div class="form-group"><label>Portfolio Website</label><div class="input-wrap"><input type="url" id="prof-portfolio" placeholder="https://mywebsite.com" /></div></div>
+
+              <button class="btn-primary" style="margin-top:24px; width: 100%" onclick="saveProfile()">Save Changes</button>
+            </div>
+            <div class="glass-card">
+              <div class="card-header"><h3>Resume Uploads</h3></div>
+              <div class="resume-list" id="profile-resume-list">
+                <p class="muted" style="padding: 12px; text-align: center;">No resumes uploaded yet.</p>
+              </div>
+              <button class="btn-outline" style="margin-top:16px;width:100%">Upload New Resume</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end view-container -->
+    </div><!-- end main-content -->
+  </div><!-- end app-layout -->
+</div>
+
+<!-- ============================================================
+     HR DASHBOARD
+============================================================ -->
+<div id="page-hr" class="page">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+            <rect x="1" y="1" width="9" height="9" rx="2" fill="#6366f1"/>
+            <rect x="12" y="1" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/>
+            <rect x="1" y="12" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/>
+            <rect x="12" y="12" width="9" height="9" rx="2" fill="#6366f1" opacity="0.5"/>
+          </svg>
+        </span>
+        ResumeX
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Recruiter</div>
+        <a class="sidebar-link active" data-tab="hr-dashboard">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+          HR Dashboard
+        </a>
+        <a class="sidebar-link" data-tab="hr-talent">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><circle cx="11" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M1 14c0-2.21 1.79-4 4-4h6c2.21 0 4 1.79 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Talent Search
+        </a>
+        <a class="sidebar-link" data-tab="hr-shortlisted">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+          Shortlisted
+          <span class="sidebar-badge">3</span>
+        </a>
+        <a class="sidebar-link" data-tab="hr-postings">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="5" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 5V4a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.4"/></svg>
+          Job Postings
+        </a>
+        <a class="sidebar-link" onclick="location.reload()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3l-5 5 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Logout
+        </a>
+      </nav>
+      <div class="sidebar-user">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#22c55e,#16a34a)">SR</div>
+        <div class="user-info"><strong>Sneha Rao</strong><span>HR Manager</span></div>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left"><h1 class="topbar-title">Talent Search</h1></div>
+        <div class="topbar-right">
+          <button class="btn-primary btn-sm">Post a Job</button>
+          <div class="user-avatar sm" style="background:linear-gradient(135deg,#22c55e,#16a34a)">SR</div>
+        </div>
+      </header>
+
+      <div class="view-container">
+        <!-- Overview / Dashboard -->
+        <div id="view-hr-dashboard" class="view active">
+          <div class="view-header">
+            <h2>HR Command Center</h2>
+            <p>Overview of your hiring pipeline and platform activity.</p>
+          </div>
+          <div class="stats-header" style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px;">
+            <div class="stat-box"><h4>Active Jobs</h4><h2 class="big-num" id="hr-stat-active-jobs">0</h2></div>
+            <div class="stat-box primary"><h4>New Applications</h4><h2 class="big-num" id="hr-stat-new-apps">0</h2></div>
+            <div class="stat-box warning"><h4>Shortlisted</h4><h2 class="big-num" id="hr-stat-shortlisted">0</h2></div>
+          </div>
+
+          <div class="audit-section">
+            <h3>📩 Incoming Applications</h3>
+            <div id="hr-applicants-list" class="rewrites-container" style="margin-top: 20px;">
+              <p class="muted">Loading applications...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Talent Search / Matchmaker -->
+        <div id="view-hr-talent" class="view">
+          <div class="view-header">
+            <h2>Talent Matchmaker</h2>
+            <p>Discover perfectly aligned candidates using semantic AI matching.</p>
+          </div>
+          <div class="audit-section">
+            <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
+               <input type="number" id="test-job-id" placeholder="Job ID to run AI match on..." style="flex:1" />
+               <button class="btn-primary" onclick="runMatchmaker(document.getElementById('test-job-id').value)">Run AI Matchmaker</button>
+            </div>
+            <div id="hr-matchmaker-results" class="rewrites-container">
+               <p class="muted">Enter a Job ID above to see AI-ranked candidate matches.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job Postings -->
+        <div id="view-hr-postings" class="view">
+          <div class="view-header">
+            <h2>Job Management</h2>
+            <p>Deploy new roles and manage your active listings.</p>
+          </div>
+          <div class="audit-grid">
+            <div class="audit-card strengths" style="display: flex; flex-direction: column;">
+              <h3>📢 Post a Job</h3>
+              <input type="text" class="form-input" id="hr-job-title" placeholder="Job Title (e.g., Senior Node Engineer)" style="margin-bottom: 12px;">
+              <textarea class="text-area" id="hr-job-desc" placeholder="Job description..." rows="3" style="margin-bottom: 12px;"></textarea>
+              <input type="text" class="form-input" id="hr-job-skills" placeholder="Skills (comma separated, e.g., Node.js, AWS)" style="margin-bottom: 20px;">
+              <button class="btn-primary" onclick="postJob()">Deploy Job</button>
+            </div>
+            <div class="audit-card">
+              <h3>💼 Active Postings</h3>
+              <ul id="hr-my-jobs" style="padding:0; list-style-type: none;"><li class="muted">Loading jobs...</li></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shortlisted -->
+        <div id="view-hr-shortlisted" class="view">
+          <div class="view-header">
+            <h2>Shortlisted Candidates</h2>
+            <p>Manage your top-tier talent pool.</p>
+          </div>
+          <div id="hr-shortlisted-list" class="rewrites-container">
+            <p class="muted">No candidates shortlisted yet. Use the Dashboard to review applications.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ADMIN DASHBOARD
+============================================================ -->
+<div id="page-admin" class="page">
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar-admin">
+      <div class="sidebar-logo">
+        <span class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 22 22" fill="none"><rect x="1" y="1" width="9" height="9" rx="2" fill="#6366f1"/><rect x="12" y="1" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/><rect x="1" y="12" width="9" height="9" rx="2" fill="#22c55e" opacity="0.7"/><rect x="12" y="12" width="9" height="9" rx="2" fill="#6366f1" opacity="0.5"/></svg>
+        </span>
+        ResumeX
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Admin</div>
+        <a class="sidebar-link active" data-tab="admin-dashboard">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+          Analytics
+         </a>
+        <a class="sidebar-link" data-tab="admin-users">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><circle cx="11" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M1 14c0-2.21 1.79-4 4-4h6c2.21 0 4 1.79 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Users
+        </a>
+        <a class="sidebar-link" data-tab="admin-jobs">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="5" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 5V4a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.4"/></svg>
+          Job Listings
+        </a>
+        <a class="sidebar-link" onclick="location.reload()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3l-5 5 5 5" stroke="currentColor" stroke-width="1.4"/></svg>
+          Logout
+        </a>
+      </nav>
+      <div class="sidebar-user">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#ec4899,#db2777)">AD</div>
+        <div class="user-info"><strong>Admin</strong><span>Super Admin</span></div>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left"><h1 class="topbar-title">Platform Analytics</h1></div>
+        <div class="topbar-right">
+          <button class="btn-ghost btn-sm">Export Report</button>
+          <div class="user-avatar sm" style="background:linear-gradient(135deg,#ec4899,#db2777)">AD</div>
+        </div>
+      </header>
+
+      <div class="view-container">
+        <!-- Analytics Dashboard -->
+        <div id="view-admin-dashboard" class="view active">
+          <div class="view-header">
+            <h2>Admin Center</h2>
+            <p>Manage platform registrations and global statistics.</p>
+          </div>
+          
+          <div class="stats-header" style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px;">
+            <div class="stat-box primary"><h4>Total Resumes</h4><h2 class="big-num" id="admin-resumes">0</h2></div>
+            <div class="stat-box warning"><h4>Verified HRs</h4><h2 class="big-num" id="admin-hrs">0</h2></div>
+            <div class="stat-box"><h4>Platform Students</h4><p id="admin-students" class="text-xs" style="color:#e2e8f0">0</p></div>
+          </div>
+
+          <div class="audit-section">
+            <h3>📋 Pending HR Approvals</h3>
+            <table class="dashboard-table" style="width:100%; border-collapse: collapse;">
+              <thead>
+                <tr><th style="text-align: left;">Company</th><th style="text-align: left;">Position</th><th style="text-align: left;">LinkedIn</th><th style="text-align: left;">Status</th><th style="text-align: right;">Actions</th></tr>
+              </thead>
+              <tbody id="admin-hr-table-body">
+                <tr><td colspan="4" style="text-align: center;" class="muted">Click "Load Admin Stats" to begin...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <button class="btn-primary" style="margin-top:20px" onclick="loadAdminStats()">Refresh Stats</button>
+        </div>
+
+        <!-- Users Management -->
+        <div id="view-admin-users" class="view">
+          <div class="view-header"><h2>User Management</h2><p>View and manage all registered accounts across the platform.</p></div>
+          <div class="audit-section">
+            <table class="dashboard-table" style="width:100%; border-collapse: collapse;">
+              <thead>
+                <tr><th style="text-align: left;">ID</th><th style="text-align: left;">Email</th><th style="text-align: left;">Role</th><th style="text-align: left;">Joined Date</th></tr>
+              </thead>
+              <tbody id="admin-users-table-body">
+                <tr><td colspan="4" style="text-align: center;" class="muted">Fetching users...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Jobs Management -->
+        <div id="view-admin-jobs" class="view">
+          <div class="view-header"><h2>Global Job Listings</h2><p>Observe all active recruitment activity on ResumeX.</p></div>
+          <div class="audit-section">
+            <table class="dashboard-table" style="width:100%; border-collapse: collapse;">
+              <thead>
+                <tr><th style="text-align: left;">Title</th><th style="text-align: left;">Company</th><th style="text-align: left;">Post Date</th><th style="text-align: right;">ID</th></tr>
+              </thead>
+              <tbody id="admin-jobs-table-body">
+                <tr><td colspan="4" style="text-align: center;" class="muted">Fetching job listings...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="data/candidates.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

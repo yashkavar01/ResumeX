@@ -1,0 +1,60 @@
+# Node.js Backend & AI Matching Engine Implementation
+
+You requested a Node.js backend using Sequelize, robust skill extraction, and an AI Matching Engine score calculation. Since we previously built a FastAPI (Python) backend in the `backend/` folder, I propose creating this new Node.js system in a new `backend-node/` folder to avoid deleting your previous Python work. 
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Database & Architecture**
+> 1. Is it okay if I create the Node project in a new folder called `backend-node`? Alternatively, I can delete the existing Python `backend` folder and place the Node project there.
+> 2. You mentioned using `pdf-parse` in Node but also noted "If you find the Node extraction is messy, consider creating a tiny Python microservice". For now, I will use pure Node.js with `pdf-parse` as requested in Task 2. Is this acceptable for the initial version?
+
+> [!WARNING]
+> **MySQL Database**
+> We will need to configure `Sequelize` to connect to your MySQL database. I will set up a `.env` file for your MySQL credentials. If your database requires a specific setup or password, please let me know or you can update the `.env` file after I generate it.
+
+## Proposed Changes
+
+### 1. Project Initialization (`backend-node/`)
+- Initialize a new `package.json`.
+- Install necessary dependencies: `express`, `sequelize`, `mysql2`, `pdf-parse`, `multer` (for handling PDF uploads), `cors`, and `dotenv`.
+
+### 2. Database Setup (Sequelize Models)
+We will follow the requested specialization pattern with Clean Architecture in `backend-node/src/models`:
+- **User**: Base model for authentication (id, email, password, role).
+- **Student**: 1:1 linked to User.
+- **HR_Profile**: 1:1 linked to User.
+- **Resume**: Tied to Student.
+- **Skill**: Master list of skills.
+- **Resume_Skills**: Junction table between Resume and Skill.
+- **Job**: Tied to HR_Profile.
+- **Job_Skills**: Junction table between Job and Skill.
+- **Job_Matches**: Stores `match_percentage` calculated between a Student and a Job.
+
+### 3. Logic Engine (`POST /analyze`)
+A controller to handle PDF uploads:
+- Located in `backend-node/src/controllers/resumeController.js` and `backend-node/src/services/resumeService.js`.
+- Uses `multer` to accept the file upload and saves it to `backend-node/uploads/`.
+- Extracts text using `pdf-parse`.
+- Matches words against a master list (`skills.json`).
+- Saves the mapped skills to the database using the `Resume_Skills` junction table.
+
+### 4. AI Matching Engine (`GET /recommendations/:studentId`)
+- Core logic in `backend-node/src/services/matchEngine.js`.
+- Fetches all `Job` requirements and the `Student`'s extracted skills.
+- Implements the matching algorithm: `(StudentSkills ∩ JobSkills) / JobSkills * 100`.
+- Returns a ranked list of best jobs for the student.
+
+### 5. Frontend Enhancements
+- If requested, we will integrate Vanilla JS Toast notifications showing "Detecting Skills..." real-time feedback during the `/analyze` API call. 
+
+## Verification Plan
+
+### Automated/Local Tests
+- Test connection to MySQL via Sequelize.
+- Send a sample PDF to `POST /analyze` and verify text extraction and database insertions.
+- Send a request to `GET /recommendations/:studentId` with a mock student and mock jobs to verify the percentage math is completely accurate.
+
+### Manual Verification
+- Provide instructions to run `node index.js`.
+- Provide sample `curl` or Postman configurations to test the endpoints easily.
