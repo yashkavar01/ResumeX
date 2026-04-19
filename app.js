@@ -2,7 +2,8 @@
    ResumeX — app.js
    ===================================================== */
 
-const API_BASE = 'http://localhost:8005';
+const API_BASE = 'http://localhost:8010';
+let allJobsAvailable = []; // Background cache for job listings
 
 // ---- TOAST NOTIFICATIONS ----
 function showToast(message, type = 'info', duration = 3000) {
@@ -19,7 +20,7 @@ function showToast(message, type = 'info', duration = 3000) {
     container.style.gap = '10px';
     document.body.appendChild(container);
   }
-  
+
   const toast = document.createElement('div');
   toast.style.background = type === 'info' ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : (type === 'success' ? '#22c55e' : '#ef4444');
   toast.style.color = '#fff';
@@ -32,14 +33,14 @@ function showToast(message, type = 'info', duration = 3000) {
   toast.style.transform = 'translateY(20px)';
   toast.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
   toast.textContent = message;
-  
+
   container.appendChild(toast);
-  
+
   setTimeout(() => {
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0)';
   }, 10);
-  
+
   if (duration > 0) {
     setTimeout(() => {
       toast.style.opacity = '0';
@@ -47,15 +48,15 @@ function showToast(message, type = 'info', duration = 3000) {
       setTimeout(() => toast.remove(), 300);
     }, duration);
   }
-  
+
   return toast; // Return element so we can remove it manually if needed
 }
 
 // ---- PAGE NAVIGATION ----
 const ROLE_PAGE_MAP = {
   student: 'dashboard',
-  hr:      'hr',
-  admin:   'admin'
+  hr: 'hr',
+  admin: 'admin'
 };
 
 function showPage(pageId) {
@@ -63,12 +64,12 @@ function showPage(pageId) {
   const target = document.getElementById('page-' + pageId);
   if (target) {
     target.classList.add('active');
-    
+
     // Automatically switch to the default view for this page
     if (pageId === 'dashboard') switchTab('overview');
     else if (pageId === 'hr') switchTab('hr-dashboard');
     else if (pageId === 'admin') switchTab('admin-dashboard');
-    
+
     window.scrollTo(0, 0);
   }
 }
@@ -113,10 +114,10 @@ function switchTab(tabId, element) {
 
   // 4. Run data-refresh triggers based on tabId
   if (tabId === 'overview') {
-      fetchDashboardData();
-      loadNotifications();
+    fetchDashboardData();
+    loadNotifications();
   }
-  else if (tabId === 'profile') loadProfile();
+  else if (tabId === 'profile' || tabId === 'hr-profile') loadProfile();
   else if (tabId === 'jobs') loadStudentJobBoard();
   else if (tabId === 'admin-dashboard') loadAdminStats();
   else if (tabId === 'admin-users') fetchAdminUsers();
@@ -137,20 +138,110 @@ function selectRole(btn) {
   btn.classList.add('active');
   selectedRole = btn.dataset.role;
 
-  // Toggle HR fields
+  // Toggle HR fields (only shown if currently in register mode)
   const hrFields = document.getElementById('hr-registration-fields');
   if (hrFields) {
     hrFields.style.display = (selectedRole === 'hr') ? 'block' : 'none';
   }
+
+  // Admin account creation is restricted
+  const authDivider = document.getElementById('auth-divider-or');
+  const createAccountBtn = document.getElementById('btn-create-account');
+
+  if (selectedRole === 'admin') {
+    if (authDivider) authDivider.style.display = 'none';
+    if (createAccountBtn) createAccountBtn.style.display = 'none';
+
+    // If user is currently on registration form, switch them back to login
+    const registerSection = document.getElementById('register-form-section');
+    if (registerSection && registerSection.style.display === 'block') {
+      toggleAuthMode('login');
+    }
+  } else {
+    if (authDivider) authDivider.style.display = 'flex'; // Use flex as it's a divider
+    if (createAccountBtn) createAccountBtn.style.display = 'block';
+  }
 }
 
 function toggleAuthMode(mode) {
-  if (mode === 'register') {
-    document.getElementById('login-form-section').style.display = 'none';
-    document.getElementById('register-form-section').style.display = 'block';
-  } else {
-    document.getElementById('register-form-section').style.display = 'none';
-    document.getElementById('login-form-section').style.display = 'block';
+  const sections = ['login-form-section', 'register-form-section', 'forgot-form-section', 'otp-form-section'];
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const targetId = `${mode}-form-section`;
+  const targetEl = document.getElementById(targetId);
+  if (targetEl) targetEl.style.display = 'block';
+
+  // Hide/Show selector based on mode
+  const roleSelector = document.querySelector('.role-selector');
+  if (roleSelector) {
+    roleSelector.style.display = (mode === 'login' || mode === 'register') ? 'flex' : 'none';
+  }
+}
+
+async function handleForgotPassword() {
+  const email = document.getElementById('forgot-email').value;
+  const errEl = document.getElementById('forgot-error');
+  
+  if (!email) {
+    errEl.textContent = 'Please enter your email address';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE + '/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Failed to send OTP');
+
+    showToast('6-digit OTP sent to your email!', 'success');
+    toggleAuthMode('otp');
+    // Pre-fill email or state if needed
+    localStorage.setItem('reset_email', email); 
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+async function handleResetPassword() {
+  const email = localStorage.getItem('reset_email');
+  const otp = document.getElementById('reset-otp').value;
+  const newPassword = document.getElementById('reset-new-pass').value;
+  const errEl = document.getElementById('reset-error');
+
+  if (!otp || otp.length < 6) {
+    errEl.textContent = 'Please enter the 6-digit OTP';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!newPassword || newPassword.length < 6) {
+    errEl.textContent = 'Password must be at least 6 characters';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE + '/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp, newPassword })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Reset failed');
+
+    showToast('Password reset successfully! Please log in.', 'success');
+    localStorage.removeItem('reset_email');
+    toggleAuthMode('login');
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
   }
 }
 
@@ -159,7 +250,7 @@ async function handleAuth(mode) {
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-pass').value;
     const errEl = document.getElementById('login-error');
-    
+
     try {
       const fd = new FormData();
       fd.append('username', email);
@@ -170,7 +261,7 @@ async function handleAuth(mode) {
       });
       if (!res.ok) {
         let errData = { detail: 'Invalid credentials' };
-        try { errData = await res.json(); } catch(e) {}
+        try { errData = await res.json(); } catch (e) { }
         throw new Error(errData.detail);
       }
       const data = await res.json();
@@ -186,10 +277,10 @@ async function handleAuth(mode) {
     const email = document.getElementById('register-email').value;
     const pass = document.getElementById('register-pass').value;
     const errEl = document.getElementById('register-error');
-    
+
     try {
       const payload = { name, email, password: pass, role: selectedRole };
-      
+
       // If HR, collect extra fields
       if (selectedRole === 'hr') {
         payload.companyName = document.getElementById('register-company').value;
@@ -210,7 +301,7 @@ async function handleAuth(mode) {
       toggleAuthMode('login');
       document.getElementById('login-email').value = email;
       document.getElementById('login-pass').value = pass;
-      
+
       if (selectedRole === 'hr') {
         showToast('Registration successful! Contact admin for approval.', 'success', 6000);
       } else {
@@ -226,7 +317,7 @@ async function handleAuth(mode) {
 function finishAuthFlow(role) {
   const page = ROLE_PAGE_MAP[role] || 'dashboard';
   showPage(page);
-  
+
   if (page === 'dashboard') {
     fetchDashboardData();
     loadNotifications();
@@ -251,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
       switchTab(tabId, el);
     });
   });
-  
+
   // Also handle [data-view] legacy elements
   document.querySelectorAll('[data-view]').forEach(el => {
     el.addEventListener('click', (e) => {
@@ -264,17 +355,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchDashboardData() {
   const token = localStorage.getItem('token');
-  if(!token) return;
+  if (!token) return;
 
   try {
     const res = await fetch(API_BASE + '/dashboard', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
-    if(res.ok) {
+    if (res.ok) {
       const data = await res.json();
       updateDashboardUI(data);
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e);
   }
 }
@@ -288,7 +379,7 @@ function updateDashboardUI(data) {
     document.querySelector('.big-num').innerText = data.score;
     const tags = data.skills.map(s => `<span class="tag tag-green">${s}</span>`).join('');
     document.getElementById('analysis-tags').innerHTML = tags;
-    
+
     if (grid) grid.style.display = 'grid';
     if (statsGrid) statsGrid.style.display = 'grid';
     if (welcomeP) welcomeP.style.display = 'block';
@@ -298,7 +389,7 @@ function updateDashboardUI(data) {
     if (statsGrid) statsGrid.style.display = 'none';
     if (welcomeP) welcomeP.style.display = 'none';
   }
-  
+
   // Update Greeting
   const h2 = document.querySelector('.welcome-banner h2');
   if (h2) h2.innerHTML = `Good morning, ${data.user_name} 👋`;
@@ -306,16 +397,16 @@ function updateDashboardUI(data) {
   // Update Sidebar and Topbar Name
   const userInfos = document.querySelectorAll('.user-info strong');
   userInfos.forEach(info => info.innerText = data.user_name);
-  
+
   // Update Avatars dynamically
-  const initials = data.user_name ? data.user_name.substring(0,2).toUpperCase() : 'U';
+  const initials = data.user_name ? data.user_name.substring(0, 2).toUpperCase() : 'U';
   const avatars = document.querySelectorAll('.user-avatar');
   avatars.forEach(av => {
-     if(!av.closest('.cand-header')) {
-        av.innerText = initials;
-     }
+    if (!av.closest('.cand-header')) {
+      av.innerText = initials;
+    }
   });
-  
+
   setTimeout(() => animateProgressBars(), 100);
 }
 
@@ -333,125 +424,206 @@ function animateProgressBars() {
 // ---- PROFILE LOGIC ----
 async function loadProfile() {
   const token = localStorage.getItem('token');
-  if(!token) return;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (!token) return;
 
   try {
     const res = await fetch(API_BASE + '/profile', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
-    if(res.ok) {
+    if (res.ok) {
       const data = await res.json();
-      
-      document.getElementById('prof-email').value = data.email || '';
-      
       const p = data.profile || {};
-      
-      // Dynamically update the top header card
-      const displayName = document.getElementById('prof-display-name');
-      if (displayName) {
+
+      if (user.role === 'hr') {
+        // Populate HR Profile fields
+        document.getElementById('hr-prof-email').value = data.email || '';
+        document.getElementById('hr-prof-firstname').value = p.firstName || '';
+        document.getElementById('hr-prof-lastname').value = p.lastName || '';
+        document.getElementById('hr-prof-company').value = p.companyName || '';
+        document.getElementById('hr-prof-position').value = p.position || '';
+        document.getElementById('hr-prof-phone').value = p.phone || '';
+        document.getElementById('hr-prof-location').value = p.location || '';
+        document.getElementById('hr-prof-linkedin').value = p.linkedInUrl || '';
+        document.getElementById('hr-prof-bio').value = p.bio || '';
+
+        const hrName = (p.firstName || p.lastName) ? `${p.firstName || ''} ${p.lastName || ''}`.trim() : 'Recruiter';
+        document.getElementById('hr-prof-display-name').innerText = hrName;
+        document.getElementById('hr-prof-display-email').innerText = data.email || '';
+
+        // Update Sidebar/Topbar
+        const sidebarName = document.getElementById('hr-sidebar-name');
+        if (sidebarName) sidebarName.innerText = hrName;
+        const sidebarPos = document.getElementById('hr-sidebar-position');
+        if (sidebarPos) sidebarPos.innerText = p.position || 'HR Representative';
+
+        const initials = p.firstName ? p.firstName.substring(0, 2).toUpperCase() : 'HR';
+        const avatars = document.querySelectorAll('#page-hr .user-avatar, #view-hr-profile .profile-avatar, #hr-sidebar-avatar, #hr-topbar-avatar');
+        avatars.forEach(av => av.innerText = initials);
+      } else {
+        // Populate Student Profile fields (Existing logic)
+        const studentEmailInput = document.getElementById('prof-email');
+        if (studentEmailInput) studentEmailInput.value = data.email || '';
+
+        const displayName = document.getElementById('prof-display-name');
+        if (displayName) {
           displayName.innerText = (p.firstName || p.lastName) ? `${p.firstName || ''} ${p.lastName || ''}`.trim() : 'User';
-      }
-      const displayEmail = document.getElementById('prof-display-email');
-      if (displayEmail) displayEmail.innerText = data.email || '';
-      const displayRole = document.getElementById('prof-display-role');
-      if (displayRole) displayRole.innerText = data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : 'Student';
+        }
+        const displayEmail = document.getElementById('prof-display-email');
+        if (displayEmail) displayEmail.innerText = data.email || '';
 
-      document.getElementById('prof-firstname').value = p.firstName || '';
-      document.getElementById('prof-lastname').value = p.lastName || '';
-      document.getElementById('prof-phone').value = p.phone || '';
-      document.getElementById('prof-location').value = p.location || '';
-      document.getElementById('prof-qualification').value = p.qualification || '';
-      document.getElementById('prof-university').value = p.university || '';
-      document.getElementById('prof-experience').value = p.experienceYears || '';
-      document.getElementById('prof-salary').value = p.expectedSalary || '';
-      document.getElementById('prof-bio').value = p.bio || '';
-      document.getElementById('prof-linkedin').value = p.linkedinUrl || '';
-      document.getElementById('prof-github').value = p.githubUrl || '';
-      document.getElementById('prof-portfolio').value = p.portfolioUrl || '';
-      
-      // Update Resume List
-      const resumeList = document.getElementById('profile-resume-list');
-      if (resumeList) {
+        const displayRole = document.getElementById('prof-display-role');
+        if (displayRole) displayRole.innerText = data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : 'Student';
+
+        document.getElementById('prof-firstname').value = p.firstName || '';
+        document.getElementById('prof-lastname').value = p.lastName || '';
+        document.getElementById('prof-phone').value = p.phone || '';
+        document.getElementById('prof-location').value = p.location || '';
+        document.getElementById('prof-qualification').value = p.qualification || '';
+        document.getElementById('prof-university').value = p.university || '';
+        document.getElementById('prof-experience').value = p.experienceYears || '';
+        document.getElementById('prof-salary').value = p.expectedSalary || '';
+        document.getElementById('prof-bio').value = p.bio || '';
+        document.getElementById('prof-linkedin').value = p.linkedinUrl || '';
+        document.getElementById('prof-github').value = p.githubUrl || '';
+        document.getElementById('prof-portfolio').value = p.portfolioUrl || '';
+
+        const resumeList = document.getElementById('profile-resume-list');
+        if (resumeList) {
           if (data.resumes && data.resumes.length > 0) {
-              resumeList.innerHTML = data.resumes.map((r, index) => {
-                  const isActive = index === 0; // Most recently uploaded is "Active"
-                  const dateInfo = new Date(r.createdAt).toLocaleDateString();
-                  return `
-                    <div class="resume-item">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <rect x="4" y="2" width="16" height="20" rx="2" stroke="${isActive ? '#6366f1' : '#94a3b8'}" stroke-width="1.5"/>
-                        <path d="M8 7h8M8 11h8M8 15h5" stroke="${isActive ? '#6366f1' : '#94a3b8'}" stroke-width="1.5" stroke-linecap="round"/>
-                      </svg>
-                      <div>
-                        <strong>${r.filename || 'Resume_' + r.id + '.pdf'}</strong>
-                        <span class="muted">Uploaded ${dateInfo}</span>
+            resumeList.innerHTML = data.resumes.map((r, index) => {
+              const isActive = index === 0;
+              const dateInfo = new Date(r.createdAt).toLocaleDateString();
+              return `
+                      <div class="resume-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <rect x="4" y="2" width="16" height="20" rx="2" stroke="${isActive ? '#6366f1' : '#94a3b8'}" stroke-width="1.5"/>
+                          <path d="M8 7h8M8 11h8M8 15h5" stroke="${isActive ? '#6366f1' : '#94a3b8'}" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <div>
+                          <strong>${r.filename || 'Resume_' + r.id + '.pdf'}</strong>
+                          <span class="muted">Uploaded ${dateInfo}</span>
+                        </div>
+                        <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+                          <span class="tag ${isActive ? 'tag-green' : ''}">${isActive ? 'Active' : 'Old'}</span>
+                          <button class="btn-ghost" style="color:#ef4444; padding:4px;" onclick="deleteResume(${r.id})">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                          </button>
+                        </div>
                       </div>
-                      <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
-                        <span class="tag ${isActive ? 'tag-green' : ''}">${isActive ? 'Active' : 'Old'}</span>
-                        <button class="btn-ghost" style="color:#ef4444; padding:4px;" onclick="deleteResume(${r.id})">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                        </button>
-                      </div>
-                    </div>
-                  `;
-              }).join('');
+                    `;
+            }).join('');
           } else {
-              resumeList.innerHTML = '<p class="muted" style="padding: 12px; text-align: center;">No resumes uploaded yet.</p>';
+            resumeList.innerHTML = '<p class="muted" style="padding: 12px; text-align: center;">No resumes uploaded yet.</p>';
           }
-      }
+        }
 
-      const avatars = document.querySelectorAll('.profile-avatar');
-      avatars.forEach(av => av.innerText = p.firstName ? p.firstName.substring(0,2).toUpperCase() : 'U');
+        const avatars = document.querySelectorAll('#page-dashboard .user-avatar, #view-profile .profile-avatar');
+        avatars.forEach(av => av.innerText = p.firstName ? p.firstName.substring(0, 2).toUpperCase() : 'U');
+      }
+    } else {
+      const errData = await res.json();
+      console.error('Profile fetch failed:', errData);
+      const msg = `[V4-Debug] ${errData.detail || errData.error || 'Profile Not Found'}`;
+      showToast(msg, 'error');
     }
-  } catch(e) {
+  } catch (e) {
     console.error('Failed to load profile:', e);
+    showToast('Network error loading profile', 'error');
   }
 }
 
 async function saveProfile() {
   const token = localStorage.getItem('token');
-  if(!token) return;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (!token) return;
 
-  const payload = {
-    firstName: document.getElementById('prof-firstname').value,
-    lastName: document.getElementById('prof-lastname').value,
-    phone: document.getElementById('prof-phone').value,
-    location: document.getElementById('prof-location').value,
-    qualification: document.getElementById('prof-qualification').value,
-    university: document.getElementById('prof-university').value,
-    experienceYears: parseInt(document.getElementById('prof-experience').value) || 0,
-    expectedSalary: document.getElementById('prof-salary').value,
-    bio: document.getElementById('prof-bio').value,
-    linkedinUrl: document.getElementById('prof-linkedin').value,
-    githubUrl: document.getElementById('prof-github').value,
-    portfolioUrl: document.getElementById('prof-portfolio').value
-  };
+  let payload = {};
+
+  if (user.role === 'hr') {
+    payload = {
+      firstName: document.getElementById('hr-prof-firstname').value,
+      lastName: document.getElementById('hr-prof-lastname').value,
+      companyName: document.getElementById('hr-prof-company').value,
+      position: document.getElementById('hr-prof-position').value,
+      phone: document.getElementById('hr-prof-phone').value,
+      location: document.getElementById('hr-prof-location').value,
+      linkedInUrl: document.getElementById('hr-prof-linkedin').value,
+      bio: document.getElementById('hr-prof-bio').value
+    };
+  } else {
+    payload = {
+      firstName: document.getElementById('prof-firstname').value,
+      lastName: document.getElementById('prof-lastname').value,
+      phone: document.getElementById('prof-phone').value,
+      location: document.getElementById('prof-location').value,
+      qualification: document.getElementById('prof-qualification').value,
+      university: document.getElementById('prof-university').value,
+      experienceYears: parseInt(document.getElementById('prof-experience').value) || 0,
+      expectedSalary: document.getElementById('prof-salary').value,
+      bio: document.getElementById('prof-bio').value,
+      linkedinUrl: document.getElementById('prof-linkedin').value,
+      githubUrl: document.getElementById('prof-github').value,
+      portfolioUrl: document.getElementById('prof-portfolio').value
+    };
+  }
 
   try {
     const res = await fetch(API_BASE + '/profile', {
       method: 'PUT',
-      headers: { 
+      headers: {
         'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
-    
-    if(res.ok) {
+
+    if (res.ok) {
       showToast('Profile updated successfully! ✅', 'success');
       loadProfile(); // refresh data
-      fetchDashboardData(); // update avatar everywhere
+      fetchDashboardData();
     } else {
-      showToast('Failed to update profile.', 'error');
+      const err = await res.json();
+      showToast(err.detail || 'Failed to update profile.', 'error');
     }
-  } catch(e) {
+  } catch (e) {
     showToast('Network error updating profile', 'error');
+  }
+}
+
+async function deleteAccount() {
+  const confirmDelete = confirm("ARE YOU SURE? This will permanently delete your account, all uploaded resumes, job applications, and any other data associated with your profile. This action CANNOT be undone.");
+
+  if (!confirmDelete) return;
+
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  try {
+    const res = await fetch(API_BASE + '/profile', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+
+    if (res.ok) {
+      showToast('Account deleted successfully. We\'re sorry to see you go!', 'info', 5000);
+      setTimeout(() => {
+        logout(); // Clear token/user and redirect to landing
+      }, 2000);
+    } else {
+      const error = await res.json();
+      showToast(error.detail || 'Failed to delete account', 'error');
+    }
+  } catch (e) {
+    showToast('Network error while deleting account', 'error');
   }
 }
 
 // ---- UPLOAD SIMULATOR ----
 function simulateUpload() {
-  const zone   = document.getElementById('upload-zone');
+  const zone = document.getElementById('upload-zone');
   const result = document.getElementById('upload-result');
   const analysis = document.getElementById('analysis-result');
   const status = document.getElementById('analyze-status');
@@ -488,7 +660,7 @@ function selectCompany(tile) {
 async function runOptimizer() {
   const result = document.getElementById('optimizer-result');
   const token = localStorage.getItem('token');
-  
+
   try {
     const res = await fetch(API_BASE + '/optimize', {
       method: 'POST',
@@ -498,35 +670,35 @@ async function runOptimizer() {
       },
       body: JSON.stringify({ company: targetCompany })
     });
-    
-    if(res.ok) {
+
+    if (res.ok) {
       const data = await res.json();
-      
+
       const list = result.querySelector('.opt-list');
-      list.innerHTML = data.suggestions.map(s => 
+      list.innerHTML = data.suggestions.map(s =>
         `<div class="opt-item high-priority"><span class="opt-priority">${s.priority}</span><p>${s.text}</p></div>`
       ).join('');
-      
+
       // Update bars
       const bars = result.querySelectorAll('.prog-bar .prog-fill');
       const spans = result.querySelectorAll('.match-score-bar > span:last-child');
-      
-      if(bars.length >= 2) {
+
+      if (bars.length >= 2) {
         bars[0].style.width = data.current_match + '%';
         bars[1].style.width = data.improved_match + '%';
       }
-      if(spans.length >= 2) {
+      if (spans.length >= 2) {
         spans[0].textContent = data.current_match + '%';
         spans[1].textContent = data.improved_match + '%';
       }
-      
+
       if (result) {
         result.style.display = 'block';
         result.style.animation = 'fadeUp 0.5s ease both';
         setTimeout(() => animateProgressBars(), 200);
       }
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e);
   }
 }
@@ -630,10 +802,10 @@ function filterCandidates() {
   const query = (document.getElementById('candidate-search')?.value || '').toLowerCase();
   const filtered = query
     ? candidatesData.filter(c =>
-        c.name.toLowerCase().includes(query) ||
-        c.skills.some(s => s.toLowerCase().includes(query)) ||
-        c.title.toLowerCase().includes(query)
-      )
+      c.name.toLowerCase().includes(query) ||
+      c.skills.some(s => s.toLowerCase().includes(query)) ||
+      c.title.toLowerCase().includes(query)
+    )
     : candidatesData;
   renderCandidates(filtered);
 }
@@ -649,20 +821,20 @@ function drawSkillsChart() {
   const container = document.getElementById('skills-chart');
   if (!container) return;
   const skills = [
-    { label: 'Python',         count: 18420, pct: 92 },
-    { label: 'JavaScript',     count: 16300, pct: 82 },
-    { label: 'Machine Learning',count: 14100, pct: 71 },
-    { label: 'React',          count: 12800, pct: 64 },
-    { label: 'SQL',            count: 11500, pct: 58 },
-    { label: 'AWS',            count:  9200, pct: 46 },
-    { label: 'Docker',         count:  7800, pct: 39 },
-    { label: 'TensorFlow',     count:  6400, pct: 32 }
+    { label: 'Python', count: 18420, pct: 92 },
+    { label: 'JavaScript', count: 16300, pct: 82 },
+    { label: 'Machine Learning', count: 14100, pct: 71 },
+    { label: 'React', count: 12800, pct: 64 },
+    { label: 'SQL', count: 11500, pct: 58 },
+    { label: 'AWS', count: 9200, pct: 46 },
+    { label: 'Docker', count: 7800, pct: 39 },
+    { label: 'TensorFlow', count: 6400, pct: 32 }
   ];
   container.innerHTML = skills.map(s => `
     <div class="bar-row">
       <span class="bar-row-label">${s.label}</span>
       <div class="bar-track"><div class="bar-fill" style="width:0%" data-pct="${s.pct}"></div></div>
-      <span class="bar-count">${(s.count/1000).toFixed(1)}K</span>
+      <span class="bar-count">${(s.count / 1000).toFixed(1)}K</span>
     </div>`).join('');
 
   setTimeout(() => {
@@ -680,11 +852,11 @@ function drawDonutChart() {
   const cx = 100, cy = 100, r = 70, innerR = 44;
 
   const segments = [
-    { label: '90–100',  value: 15, color: '#22c55e' },
-    { label: '80–89',   value: 28, color: '#6366f1' },
-    { label: '70–79',   value: 32, color: '#f59e0b' },
-    { label: '60–69',   value: 16, color: '#ec4899' },
-    { label: 'Below 60',value:  9, color: '#64748b' }
+    { label: '90–100', value: 15, color: '#22c55e' },
+    { label: '80–89', value: 28, color: '#6366f1' },
+    { label: '70–79', value: 32, color: '#f59e0b' },
+    { label: '60–69', value: 16, color: '#ec4899' },
+    { label: 'Below 60', value: 9, color: '#64748b' }
   ];
   const total = segments.reduce((a, s) => a + s.value, 0);
   let angle = -Math.PI / 2;
@@ -732,17 +904,17 @@ function drawDonutChart() {
 // ---- ADMIN PENDING HRS ----
 async function fetchPendingHRs() {
   const token = localStorage.getItem('token');
-  if(!token) return;
+  if (!token) return;
 
   try {
     const res = await fetch(API_BASE + '/admin/pending-hrs', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
-    if(res.ok) {
+    if (res.ok) {
       const { data } = await res.json();
       renderPendingHRs(data);
     }
-  } catch(e) {
+  } catch (e) {
     console.error('Failed to fetch pending HRs:', e);
   }
 }
@@ -750,7 +922,7 @@ async function fetchPendingHRs() {
 function renderPendingHRs(hrs) {
   const list = document.getElementById('pending-hrs-list');
   const badge = document.getElementById('pending-hrs-badge');
-  if(!list) return;
+  if (!list) return;
 
   if (badge) badge.textContent = hrs.length;
 
@@ -777,14 +949,14 @@ async function approveHR(hrId) {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + token }
     });
-    if(res.ok) {
+    if (res.ok) {
       showToast('HR Approved Successfully!', 'success');
       fetchPendingHRs(); // refresh
     } else {
       const err = await res.json();
       showToast(err.detail || 'Failed to approve', 'error');
     }
-  } catch(e) {
+  } catch (e) {
     showToast('Network error during approval', 'error');
   }
 }
@@ -824,7 +996,7 @@ function cancelSelection() {
   selectedResumeFile = null;
   const input = document.getElementById('resumeFile');
   if (input) input.value = '';
-  
+
   document.getElementById('upload-zone').style.display = 'flex';
   document.getElementById('upload-result').style.display = 'none';
   document.getElementById('analysis-result').style.display = 'none';
@@ -851,7 +1023,7 @@ async function analyzeResume(file) {
   }
 
   const token = localStorage.getItem('token');
-  
+
   // Real-time feedback for AI processing
   const loadingToast = showToast('Detecting Skills...', 'info', 0); // Indefinite until finished
 
@@ -869,19 +1041,19 @@ async function analyzeResume(file) {
       try {
         const errData = await response.json();
         errMsg = errData.error || errData.detail || errMsg;
-      } catch (e) {}
+      } catch (e) { }
       throw new Error(errMsg);
     }
 
     const resJson = await response.json();
-    
+
     // Success toast!
     loadingToast.remove();
     showToast('Analysis Complete! ✅', 'success');
 
     // Display formatted results safely
     displayResults(resJson.data);
-    
+
   } catch (error) {
     console.error('Analysis failed', error);
     loadingToast.remove();
@@ -894,11 +1066,11 @@ async function analyzeResume(file) {
   }
 }
 
-function displayResults(data){
+function displayResults(data) {
 
-  document.getElementById("analysis-result").style.display="block";
+  document.getElementById("analysis-result").style.display = "block";
   document.querySelector(".big-num").innerText = data.score || data.overall_ats_score || 0;
-  
+
   const fluffEl = document.getElementById('audit-fluff');
   if (fluffEl) fluffEl.innerText = data.fluff_vs_impact_analysis || "No analysis available.";
 
@@ -913,14 +1085,14 @@ function displayResults(data){
         skillsBox.appendChild(tag);
       });
     } else {
-       skillsBox.innerHTML = "<span class='text-xs'>No technical skills detected.</span>";
+      skillsBox.innerHTML = "<span class='text-xs'>No technical skills detected.</span>";
     }
   }
 
   // Render Red Flags safely
   let redFlagsHtml = '';
   if (data.red_flags && Array.isArray(data.red_flags)) {
-      redFlagsHtml = data.red_flags.map(flag => `<li>${flag}</li>`).join('');
+    redFlagsHtml = data.red_flags.map(flag => `<li>${flag}</li>`).join('');
   }
   const rfEl = document.getElementById('audit-red-flags');
   if (rfEl) rfEl.innerHTML = redFlagsHtml || "<li>No major red flags detected!</li>";
@@ -928,7 +1100,7 @@ function displayResults(data){
   // Render Strengths Safely
   let strengthsHtml = '';
   if (data.strengths && Array.isArray(data.strengths)) {
-      strengthsHtml = data.strengths.map(str => `<li>${str}</li>`).join('');
+    strengthsHtml = data.strengths.map(str => `<li>${str}</li>`).join('');
   }
   const strEl = document.getElementById('audit-strengths');
   if (strEl) strEl.innerHTML = strengthsHtml || "<li>No key strengths identified.</li>";
@@ -938,7 +1110,7 @@ function displayResults(data){
   if (rewritesContainer) {
     let rewritesHtml = '';
     if (data.bullet_point_rewrites && Array.isArray(data.bullet_point_rewrites)) {
-        rewritesHtml = data.bullet_point_rewrites.map(rw => `
+      rewritesHtml = data.bullet_point_rewrites.map(rw => `
           <div class="rewrite-box">
             <div class="rewrite-col">
               <h5>Original</h5>
@@ -971,8 +1143,8 @@ function drawLineChart() {
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
 
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const users  = [8200,11000,13500,15800,19200,22000,26500,30000,34200,39000,44000,52341];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const users = [8200, 11000, 13500, 15800, 19200, 22000, 26500, 30000, 34200, 39000, 44000, 52341];
   const max = Math.max(...users);
   const pad = { top: 20, right: 20, bottom: 30, left: 48 };
   const cw = W - pad.left - pad.right;
@@ -1073,11 +1245,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 200);
   });
 });
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded", () => {
 
-if(document.getElementById("candidates-grid")){
-renderCandidates(candidates);
-}
+  if (document.getElementById("candidates-grid")) {
+    renderCandidates(candidates);
+  }
 
 });
 const resumeInput = document.getElementById('resumeFile');
@@ -1087,22 +1259,22 @@ if (resumeInput) {
 
 // ==== Admin Dashboard Features ====
 async function loadAdminStats() {
-    try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(API_BASE + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
-        const json = await res.json();
-        
-        document.getElementById('admin-resumes').innerText = json.data.totalResumes || 0;
-        document.getElementById('admin-hrs').innerText = json.data.activeHRs || 0;
-        document.getElementById('admin-students').innerText = json.data.totalStudents || 0;
-        
-        // Also load pending HRs
-        const hrRes = await fetch(API_BASE + '/admin/pending-hrs', { headers: { 'Authorization': 'Bearer ' + token } });
-        const hrJson = await hrRes.json();
-        const tbody = document.getElementById('admin-hr-table-body');
-        
-        if(hrJson.data && hrJson.data.length > 0) {
-            tbody.innerHTML = hrJson.data.map(hr => `
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(API_BASE + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
+    const json = await res.json();
+
+    document.getElementById('admin-resumes').innerText = json.data.totalResumes || 0;
+    document.getElementById('admin-hrs').innerText = json.data.activeHRs || 0;
+    document.getElementById('admin-students').innerText = json.data.totalStudents || 0;
+
+    // Also load pending HRs
+    const hrRes = await fetch(API_BASE + '/admin/pending-hrs', { headers: { 'Authorization': 'Bearer ' + token } });
+    const hrJson = await hrRes.json();
+    const tbody = document.getElementById('admin-hr-table-body');
+
+    if (hrJson.data && hrJson.data.length > 0) {
+      tbody.innerHTML = hrJson.data.map(hr => `
                <tr>
                  <td>${hr.companyName}</td>
                  <td>${hr.position || 'N/A'}</td>
@@ -1118,24 +1290,24 @@ async function loadAdminStats() {
                  </td>
                </tr>
             `).join('');
-        } else {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;" class="muted">No pending requests!</td></tr>';
-        }
-    } catch (e) {
-        console.error(e);
-        alert('Failed to load Admin Stats');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;" class="muted">No pending requests!</td></tr>';
     }
+  } catch (e) {
+    console.error(e);
+    alert('Failed to load Admin Stats');
+  }
 }
 
 async function fetchAdminUsers() {
-    try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(API_BASE + '/admin/users', { headers: { 'Authorization': 'Bearer ' + token } });
-        const json = await res.json();
-        const tbody = document.getElementById('admin-users-table-body');
-        
-        if (json.data && json.data.length > 0) {
-            tbody.innerHTML = json.data.map(u => `
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(API_BASE + '/admin/users', { headers: { 'Authorization': 'Bearer ' + token } });
+    const json = await res.json();
+    const tbody = document.getElementById('admin-users-table-body');
+
+    if (json.data && json.data.length > 0) {
+      tbody.innerHTML = json.data.map(u => `
                 <tr>
                     <td>${u.id}</td>
                     <td>${u.email}</td>
@@ -1143,21 +1315,21 @@ async function fetchAdminUsers() {
                     <td>${new Date(u.createdAt).toLocaleDateString()}</td>
                 </tr>
             `).join('');
-        } else {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;" class="muted">No users found on the platform.</td></tr>';
-        }
-    } catch (e) { console.error(e); }
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;" class="muted">No users found on the platform.</td></tr>';
+    }
+  } catch (e) { console.error(e); }
 }
 
 async function fetchAdminJobs() {
-    try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(API_BASE + '/admin/jobs', { headers: { 'Authorization': 'Bearer ' + token } });
-        const json = await res.json();
-        const tbody = document.getElementById('admin-jobs-table-body');
-        
-        if (json.data && json.data.length > 0) {
-            tbody.innerHTML = json.data.map(j => `
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(API_BASE + '/admin/jobs', { headers: { 'Authorization': 'Bearer ' + token } });
+    const json = await res.json();
+    const tbody = document.getElementById('admin-jobs-table-body');
+
+    if (json.data && json.data.length > 0) {
+      tbody.innerHTML = json.data.map(j => `
                 <tr>
                     <td>${j.title}</td>
                     <td>${j.HR_Profile ? j.HR_Profile.companyName : 'Unknown'}</td>
@@ -1165,75 +1337,86 @@ async function fetchAdminJobs() {
                     <td style="text-align: right;"><span class="muted">#${j.id}</span></td>
                 </tr>
             `).join('');
-        } else {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;" class="muted">No jobs are currently listed.</td></tr>';
-        }
-    } catch (e) { console.error(e); }
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;" class="muted">No jobs are currently listed.</td></tr>';
+    }
+  } catch (e) { console.error(e); }
 }
 
 async function handleHRAction(id, action) {
-    const token = localStorage.getItem('token');
-    const endpoint = action === 'approve' ? `/admin/approve-hr/${id}` : `/admin/reject-hr/${id}`;
-    
-    await fetch(API_BASE + endpoint, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
-    loadAdminStats(); // refresh
+  const token = localStorage.getItem('token');
+  const endpoint = action === 'approve' ? `/admin/approve-hr/${id}` : `/admin/reject-hr/${id}`;
+
+  await fetch(API_BASE + endpoint, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+  loadAdminStats(); // refresh
 }
 
 // ==== HR Dashboard Features ====
 async function postJob() {
-   const token = localStorage.getItem('token');
-   const title = document.getElementById('hr-job-title').value;
-   const desc = document.getElementById('hr-job-desc').value;
-   const skills = document.getElementById('hr-job-skills').value.split(',').map(s=>s.trim());
-   
-   try {
-       const res = await fetch(API_BASE + '/hr/jobs', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-           body: JSON.stringify({ title, description: desc, required_skills: skills })
-       });
-       
-       if(res.ok) {
-           alert('Job Deployed Successfully!');
-           loadMyJobs();
-       } else {
-           const err = await res.json();
-           alert('Failed: ' + err.error);
-       }
-   } catch(e) { console.error(e); }
+  const token = localStorage.getItem('token');
+  const title = document.getElementById('hr-job-title').value;
+  const desc = document.getElementById('hr-job-desc').value;
+  const caseStudy = document.getElementById('hr-job-case-study')?.value || '';
+  const skills = document.getElementById('hr-job-skills').value.split(',').map(s => s.trim());
+
+  try {
+    const res = await fetch(API_BASE + '/hr/jobs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        title,
+        description: desc,
+        required_skills: skills,
+        caseStudyQuestion: caseStudy
+      })
+    });
+
+    if (res.ok) {
+      showToast('Job Deployed Successfully! 📢', 'success');
+      // Clear fields
+      document.getElementById('hr-job-title').value = '';
+      document.getElementById('hr-job-desc').value = '';
+      document.getElementById('hr-job-case-study').value = '';
+      document.getElementById('hr-job-skills').value = '';
+      loadMyJobs();
+    } else {
+      const err = await res.json();
+      showToast('Failed: ' + err.error, 'error');
+    }
+  } catch (e) { console.error(e); }
 }
 
 async function loadMyJobs() {
-    const token = localStorage.getItem('token');
-    try {
-        const res = await fetch(API_BASE + '/hr/my-jobs', { headers: { 'Authorization': 'Bearer ' + token } });
-        const json = await res.json();
-        
-        const list = document.getElementById('hr-my-jobs');
-        if(json.data && json.data.length > 0) {
-            list.innerHTML = json.data.map(job => `
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(API_BASE + '/hr/my-jobs', { headers: { 'Authorization': 'Bearer ' + token } });
+    const json = await res.json();
+
+    const list = document.getElementById('hr-my-jobs');
+    if (json.data && json.data.length > 0) {
+      list.innerHTML = json.data.map(job => `
                <li style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 10px 0;">
                  <h4 style="color:#fff; margin-bottom: 4px;">[ID: ${job.id}] ${job.title}</h4>
                  <span class="muted text-xs">${job.Skills.map(s => s.name).join(', ')}</span>
                </li>
             `).join('');
-        }
-    } catch(e) { console.error(e); }
+    }
+  } catch (e) { console.error(e); }
 }
 
 async function runMatchmaker(jobId) {
-    if (!jobId) return alert('Enter a Job ID first.');
-    const token = localStorage.getItem('token');
-    document.getElementById('hr-matchmaker-results').innerHTML = "<p class='muted'>🤖 Matchmaker is aggressively ranking candidates. Please wait...</p>";
-    
-    try {
-        const res = await fetch(API_BASE + `/hr/top-candidates/${jobId}`, { headers: { 'Authorization': 'Bearer ' + token } });
-        const json = await res.json();
-        
-        let html = '';
-        if(json.data && Array.isArray(json.data)) {
-            json.data.forEach(candidate => {
-                html += `
+  if (!jobId) return alert('Enter a Job ID first.');
+  const token = localStorage.getItem('token');
+  document.getElementById('hr-matchmaker-results').innerHTML = "<p class='muted'>🤖 Matchmaker is aggressively ranking candidates. Please wait...</p>";
+
+  try {
+    const res = await fetch(API_BASE + `/hr/top-candidates/${jobId}`, { headers: { 'Authorization': 'Bearer ' + token } });
+    const json = await res.json();
+
+    let html = '';
+    if (json.data && Array.isArray(json.data)) {
+      json.data.forEach(candidate => {
+        html += `
                   <div class="rewrite-box">
                     <div class="rewrite-col" style="flex:1;">
                       <h4 style="color: #6366f1;">Candidate Profile ID: ${candidate.studentId}</h4>
@@ -1245,34 +1428,35 @@ async function runMatchmaker(jobId) {
                     </div>
                   </div>
                 `;
-            });
-            document.getElementById('hr-matchmaker-results').innerHTML = html || "<p class='muted'>No candidates met the threshold.</p>";
-        } else {
-            document.getElementById('hr-matchmaker-results').innerHTML = "<p class='muted' style='color:#ef4444'>Matchmaker failed to return a proper format.</p>";
-        }
-    } catch(e) {
-        console.error(e);
-        document.getElementById('hr-matchmaker-results').innerHTML = "<p class='muted' style='color:#ef4444'>Matchmaker encountered an error.</p>";
+      });
+      document.getElementById('hr-matchmaker-results').innerHTML = html || "<p class='muted'>No candidates met the threshold.</p>";
+    } else {
+      document.getElementById('hr-matchmaker-results').innerHTML = "<p class='muted' style='color:#ef4444'>Matchmaker failed to return a proper format.</p>";
     }
+  } catch (e) {
+    console.error(e);
+    document.getElementById('hr-matchmaker-results').innerHTML = "<p class='muted' style='color:#ef4444'>Matchmaker encountered an error.</p>";
+  }
 }
 
 // ==== Student Job Board Features ====
 
 // 1. Fetch available jobs
 async function loadStudentJobBoard() {
-    try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(API_BASE + '/student/jobs', { headers: { 'Authorization': 'Bearer ' + token } });
-        const json = await res.json();
-        
-        const container = document.getElementById('student-jobs-container');
-        
-        if(json.data && json.data.length > 0) {
-            container.innerHTML = json.data.map(job => {
-                const company = job.HR_Profile ? job.HR_Profile.companyName : "Unknown";
-                const skills = job.Skills ? job.Skills.map(s => `<span class="tag tag-blue">${s.name}</span>`).join('') : '';
-                
-                return `
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(API_BASE + '/student/jobs', { headers: { 'Authorization': 'Bearer ' + token } });
+    const json = await res.json();
+
+    const container = document.getElementById('student-jobs-container');
+    allJobsAvailable = json.data || []; // Cache the jobs list
+
+    if (allJobsAvailable.length > 0) {
+      container.innerHTML = allJobsAvailable.map(job => {
+        const company = job.HR_Profile ? job.HR_Profile.companyName : "Unknown";
+        const skills = job.Skills ? job.Skills.map(s => `<span class="tag tag-blue">${s.name}</span>`).join('') : '';
+
+        return `
                 <div class="job-card glass-card">
                   <h3>${job.title}</h3>
                   <div class="job-meta"><span>${company}</span></div>
@@ -1280,66 +1464,115 @@ async function loadStudentJobBoard() {
                   <div class="tags-wrap mt-8">${skills}</div>
                   <div class="job-card-footer" style="margin-top: 15px; display: flex; gap: 10px;">
                     <button class="btn-primary btn-sm" onclick="trigger1ClickTailor(${job.id}, '${job.title}')">1-Click AI Tailor</button>
-                    ${job.hasApplied 
-                        ? `<button class="btn-ghost btn-sm" disabled style="color:#22c55e; border-color:#22c55e;">Applied ✅</button>` 
-                        : `<button class="btn-outline btn-sm" onclick="applyToJob(${job.id})">Apply Now</button>`}
+                    ${job.hasApplied
+            ? `<button class="btn-ghost btn-sm" disabled style="color:#22c55e; border-color:#22c55e;">Applied ✅</button>`
+            : `<button class="btn-outline btn-sm" onclick="applyToJob(${job.id})">Apply Now</button>`}
                   </div>
                 </div>
                 `;
-            }).join('');
-        } else {
-            container.innerHTML = "<p class='muted'>No jobs are actively posted right now.</p>";
-        }
-    } catch (e) {
-        console.error(e);
-        document.getElementById('student-jobs-container').innerHTML = "<p class='muted'>Failed to load job board.</p>";
+      }).join('');
+    } else {
+      container.innerHTML = "<p class='muted'>No jobs are actively posted right now.</p>";
     }
+  } catch (e) {
+    console.error(e);
+    document.getElementById('student-jobs-container').innerHTML = "<p class='muted'>Failed to load job board.</p>";
+  }
 }
 
 async function applyToJob(jobId) {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+  const token = localStorage.getItem('token');
+  if (!token) return;
 
-    try {
-        const res = await fetch(API_BASE + `/student/apply/${jobId}`, {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        
-        const json = await res.json();
-        if (res.ok) {
-            showToast('Application submitted successfully! 🚀', 'success');
-            loadStudentJobBoard(); // refresh to show "Applied"
-        } else {
-            showToast('Failed to apply: ' + (json.error || 'Server error'), 'error');
+  try {
+    // Fetch fresh job details to ensure we have the question
+    const res = await fetch(API_BASE + `/student/job/${jobId}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const json = await res.json();
+    const job = json.data;
+
+    const questionText = job ? job.caseStudyQuestion : null;
+
+    if (questionText && questionText.trim() !== '') {
+      document.getElementById('modal-question-text').innerText = questionText;
+      openModal('case-study-modal');
+
+      document.getElementById('modal-submit-btn').onclick = async () => {
+        const answer = document.getElementById('modal-answer-input').value;
+        if (!answer.trim()) {
+          showToast('Please provide a solution to the case study.', 'error');
+          return;
         }
-    } catch (e) {
-        console.error(e);
-        showToast('Network error during application.', 'error');
+        await submitApplication(jobId, answer);
+        closeModal('case-study-modal');
+        document.getElementById('modal-answer-input').value = ''; // clear
+      };
+      return;
     }
+  } catch (e) {
+    console.error('Error fetching job for application:', e);
+  }
+
+  await submitApplication(jobId);
+}
+
+async function submitApplication(jobId, caseStudyAnswer = null) {
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(API_BASE + `/student/apply/${jobId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ caseStudyAnswer })
+    });
+
+    const json = await res.json();
+    if (res.ok) {
+      showToast('Application submitted successfully! 🚀', 'success');
+      loadStudentJobBoard();
+    } else {
+      showToast('Failed to apply: ' + (json.error || 'Server error'), 'error');
+    }
+  } catch (e) {
+    console.error(e);
+    showToast('Network error during application.', 'error');
+  }
+}
+
+function openModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.add('active');
+}
+function closeModal(id) {
+  const m = document.getElementById(id);
+  if (m) {
+    m.classList.remove('active');
+    const input = m.querySelector('textarea');
+    if (input) input.value = '';
+  }
 }
 
 async function loadHRDashboard() {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+  const token = localStorage.getItem('token');
+  if (!token) return;
 
-    try {
-        const res = await fetch(API_BASE + '/hr/applicants', {
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const json = await res.json();
-        
-        if (!res.ok) {
-            console.error('HR applicants API error:', res.status, json);
-            const container = document.getElementById('hr-applicants-list');
-            if (container) container.innerHTML = `<p class='muted' style='color:#ef4444'>Server error: ${json.error || res.status}</p>`;
-            return;
-        }
+  try {
+    const res = await fetch(API_BASE + '/hr/applicants', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const json = await res.json();
 
-        const container = document.getElementById('hr-applicants-list');
-        if (!container) { console.error('hr-applicants-list element not found'); return; }
-        if (json.data && json.data.length > 0) {
-            container.innerHTML = json.data.map(app => `
+    if (!res.ok) {
+      console.error('HR applicants API error:', res.status, json);
+      const container = document.getElementById('hr-applicants-list');
+      if (container) container.innerHTML = `<p class='muted' style='color:#ef4444'>Server error: ${json.error || res.status}</p>`;
+      return;
+    }
+
+    const container = document.getElementById('hr-applicants-list');
+    if (!container) { console.error('hr-applicants-list element not found'); return; }
+    if (json.data && json.data.length > 0) {
+      container.innerHTML = json.data.map(app => `
                 <div class="job-card glass-card" style="margin-bottom: 15px;">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
@@ -1347,6 +1580,12 @@ async function loadHRDashboard() {
                       <div class="job-meta">
                         <span>Applied for: <strong>${app.Job.title}</strong></span>
                       </div>
+                      ${app.caseStudyAnswer ? `
+                        <div class="case-study-answer-box">
+                            <div class="case-study-badge">💡 Case Study Solution</div>
+                            <p style="font-size: 13px; line-height: 1.5; color: var(--muted);">${app.caseStudyAnswer}</p>
+                        </div>
+                      ` : ''}
                       <p class="muted" style="margin-top:8px; font-size:13px;">${app.Student.university} — ${app.Student.qualification}</p>
                     </div>
                     <div style="display: flex; gap: 8px;">
@@ -1356,43 +1595,43 @@ async function loadHRDashboard() {
                   </div>
                 </div>
             `).join('');
-        } else {
-            container.innerHTML = "<p class='muted'>No new applications to review.</p>";
-        }
-
-        // Update Stats
-        document.getElementById('hr-stat-new-apps').innerText = json.data ? json.data.length : 0;
-        
-        // Fetch shortlisted count for stats
-        const sRes = await fetch(API_BASE + '/hr/shortlisted', { headers: { 'Authorization': 'Bearer ' + token } });
-        const sJson = await sRes.json();
-        document.getElementById('hr-stat-shortlisted').innerText = sJson.data ? sJson.data.length : 0;
-        
-        // Fetch jobs for stats
-        const jRes = await fetch(API_BASE + '/hr/my-jobs', { headers: { 'Authorization': 'Bearer ' + token } });
-        const jJson = await jRes.json();
-        document.getElementById('hr-stat-active-jobs').innerText = jJson.data ? jJson.data.length : 0;
-
-    } catch (e) {
-        console.error('loadHRDashboard error:', e);
-        const container = document.getElementById('hr-applicants-list');
-        if (container) container.innerHTML = "<p class='muted' style='color:#ef4444'>Failed to load applications: " + e.message + "</p>";
+    } else {
+      container.innerHTML = "<p class='muted'>No new applications to review.</p>";
     }
+
+    // Update Stats
+    document.getElementById('hr-stat-new-apps').innerText = json.data ? json.data.length : 0;
+
+    // Fetch shortlisted count for stats
+    const sRes = await fetch(API_BASE + '/hr/shortlisted', { headers: { 'Authorization': 'Bearer ' + token } });
+    const sJson = await sRes.json();
+    document.getElementById('hr-stat-shortlisted').innerText = sJson.data ? sJson.data.length : 0;
+
+    // Fetch jobs for stats
+    const jRes = await fetch(API_BASE + '/hr/my-jobs', { headers: { 'Authorization': 'Bearer ' + token } });
+    const jJson = await jRes.json();
+    document.getElementById('hr-stat-active-jobs').innerText = jJson.data ? jJson.data.length : 0;
+
+  } catch (e) {
+    console.error('loadHRDashboard error:', e);
+    const container = document.getElementById('hr-applicants-list');
+    if (container) container.innerHTML = "<p class='muted' style='color:#ef4444'>Failed to load applications: " + e.message + "</p>";
+  }
 }
 
 async function loadShortlistedCandidates() {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+  const token = localStorage.getItem('token');
+  if (!token) return;
 
-    try {
-        const res = await fetch(API_BASE + '/hr/shortlisted', {
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const json = await res.json();
-        
-        const container = document.getElementById('hr-shortlisted-list');
-        if (json.data && json.data.length > 0) {
-            container.innerHTML = json.data.map(app => `
+  try {
+    const res = await fetch(API_BASE + '/hr/shortlisted', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const json = await res.json();
+
+    const container = document.getElementById('hr-shortlisted-list');
+    if (json.data && json.data.length > 0) {
+      container.innerHTML = json.data.map(app => `
                 <div class="job-card glass-card" style="margin-bottom: 15px;">
                   <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
@@ -1406,60 +1645,60 @@ async function loadShortlistedCandidates() {
                   </div>
                 </div>
             `).join('');
-        } else {
-            container.innerHTML = "<p class='muted'>No candidates shortlisted yet.</p>";
-        }
-    } catch (e) {
-        console.error(e);
-        container.innerHTML = "<p class='muted' style='color:#ef4444'>Failed to load shortlist.</p>";
+    } else {
+      container.innerHTML = "<p class='muted'>No candidates shortlisted yet.</p>";
     }
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = "<p class='muted' style='color:#ef4444'>Failed to load shortlist.</p>";
+  }
 }
 
 async function updateApplicationStatus(appId, status) {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+  const token = localStorage.getItem('token');
+  if (!token) return;
 
-    try {
-        const res = await fetch(API_BASE + `/hr/applications/${appId}/status`, {
-            method: 'POST',
-            headers: { 
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ status })
-        });
-        
-        if (res.ok) {
-            showToast(`Candidate ${status} successfully!`, 'success');
-            loadHRDashboard();
-        } else {
-            showToast('Failed to update status.', 'error');
-        }
-    } catch (e) {
-        console.error(e);
-        showToast('Network error.', 'error');
+  try {
+    const res = await fetch(API_BASE + `/hr/applications/${appId}/status`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status })
+    });
+
+    if (res.ok) {
+      showToast(`Candidate ${status} successfully!`, 'success');
+      loadHRDashboard();
+    } else {
+      showToast('Failed to update status.', 'error');
     }
+  } catch (e) {
+    console.error(e);
+    showToast('Network error.', 'error');
+  }
 }
 
 async function loadNotifications() {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+  const token = localStorage.getItem('token');
+  if (!token) return;
 
-    try {
-        const res = await fetch(API_BASE + '/notifications', {
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const json = await res.json();
-        
-        const container = document.getElementById('student-notifications-container');
-        const list = document.getElementById('student-notifications-list');
-        const badge = document.querySelector('.notif-dot');
+  try {
+    const res = await fetch(API_BASE + '/notifications', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const json = await res.json();
 
-        if (json.data && json.data.length > 0) {
-            container.style.display = 'block';
-            if (badge) badge.style.display = 'block';
-            
-            list.innerHTML = json.data.map(n => `
+    const container = document.getElementById('student-notifications-container');
+    const list = document.getElementById('student-notifications-list');
+    const badge = document.querySelector('.notif-dot');
+
+    if (json.data && json.data.length > 0) {
+      container.style.display = 'block';
+      if (badge) badge.style.display = 'block';
+
+      list.innerHTML = json.data.map(n => `
                 <div class="job-card glass-card" style="margin-bottom: 12px; border-left: 4px solid var(--${n.type === 'success' ? 'green' : 'accent'});">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
@@ -1473,64 +1712,64 @@ async function loadNotifications() {
                   </div>
                 </div>
             `).join('');
-        } else {
-            list.innerHTML = "<p class='muted'>No new updates at this time.</p>";
-            if (badge) badge.style.display = 'none';
-        }
-
-        // Update name in dash if user data exists
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            const user = JSON.parse(userStr);
-            const nameEl = document.getElementById('student-name-dash');
-            if (nameEl) nameEl.innerText = user.firstName || 'Student';
-        }
-
-    } catch (e) {
-        console.error('Error loading notifications:', e);
+    } else {
+      list.innerHTML = "<p class='muted'>No new updates at this time.</p>";
+      if (badge) badge.style.display = 'none';
     }
+
+    // Update name in dash if user data exists
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      const nameEl = document.getElementById('student-name-dash');
+      if (nameEl) nameEl.innerText = user.firstName || 'Student';
+    }
+
+  } catch (e) {
+    console.error('Error loading notifications:', e);
+  }
 }
 
 async function markNotificationRead(id) {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+  const token = localStorage.getItem('token');
+  if (!token) return;
 
-    try {
-        const res = await fetch(API_BASE + `/notifications/${id}/read`, {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (res.ok) {
-            loadNotifications(); // Refresh list
-        }
-    } catch (e) {
-        console.error('Error marking notification read:', e);
+  try {
+    const res = await fetch(API_BASE + `/notifications/${id}/read`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (res.ok) {
+      loadNotifications(); // Refresh list
     }
+  } catch (e) {
+    console.error('Error marking notification read:', e);
+  }
 }
 
 // 2. Trigger the AI Tailor Endpoint
 async function trigger1ClickTailor(jobId, jobTitle) {
-    const token = localStorage.getItem('token');
-    
-    // Open loading modal
-    const modal = document.getElementById('ai-tailor-modal');
-    modal.style.display = 'flex';
-    document.getElementById('ai-modal-title').innerText = `🤖 Tailoring Resume for ${jobTitle}...`;
-    document.getElementById('ai-modal-results').style.display = 'none';
+  const token = localStorage.getItem('token');
 
-    try {
-        const res = await fetch(API_BASE + `/student/tailor-resume/${jobId}`, { 
-            method: 'POST', 
-            headers: { 'Authorization': 'Bearer ' + token } 
-        });
-        
-        const json = await res.json();
-        
-        if (res.ok && json.data) {
-            document.getElementById('ai-modal-title').innerText = `✨ Strategically Tailored for ${jobTitle}`;
-            document.getElementById('ai-tailored-summary').innerText = json.data.tailored_summary;
-            
-            const bulletsHtml = json.data.tweaked_bullet_points.map(bp => `
+  // Open loading modal
+  const modal = document.getElementById('ai-tailor-modal');
+  modal.style.display = 'flex';
+  document.getElementById('ai-modal-title').innerText = `🤖 Tailoring Resume for ${jobTitle}...`;
+  document.getElementById('ai-modal-results').style.display = 'none';
+
+  try {
+    const res = await fetch(API_BASE + `/student/tailor-resume/${jobId}`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    const json = await res.json();
+
+    if (res.ok && json.data) {
+      document.getElementById('ai-modal-title').innerText = `✨ Strategically Tailored for ${jobTitle}`;
+      document.getElementById('ai-tailored-summary').innerText = json.data.tailored_summary;
+
+      const bulletsHtml = json.data.tweaked_bullet_points.map(bp => `
                 <div class="rewrite-box" style="margin-bottom: 15px;">
                   <div class="rewrite-col">
                     <h5 style="color:#ef4444">Original Found</h5>
@@ -1542,28 +1781,28 @@ async function trigger1ClickTailor(jobId, jobTitle) {
                   </div>
                 </div>
             `).join('');
-            
-            document.getElementById('ai-tweaked-bullets').innerHTML = bulletsHtml;
-            document.getElementById('ai-modal-results').style.display = 'block';
-        } else {
-            document.getElementById('ai-modal-title').innerText = "❌ AI Integration failed or No Resume Found.";
-        }
-    } catch(e) {
-        console.error(e);
-        document.getElementById('ai-modal-title').innerText = "❌ Connection Error.";
+
+      document.getElementById('ai-tweaked-bullets').innerHTML = bulletsHtml;
+      document.getElementById('ai-modal-results').style.display = 'block';
+    } else {
+      document.getElementById('ai-modal-title').innerText = "❌ AI Integration failed or No Resume Found.";
     }
+  } catch (e) {
+    console.error(e);
+    document.getElementById('ai-modal-title').innerText = "❌ Connection Error.";
+  }
 }
 
 async function deleteResume(id) {
   if (!confirm('Are you sure you want to delete this resume? This will remove all its analysis results.')) return;
-  
+
   const token = localStorage.getItem('token');
   try {
     const res = await fetch(API_BASE + '/resume/' + id, {
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + token }
     });
-    
+
     if (res.ok) {
       showToast('Resume deleted successfully! 🗑️', 'success');
       loadProfile();
@@ -1571,7 +1810,7 @@ async function deleteResume(id) {
     } else {
       showToast('Failed to delete resume.', 'error');
     }
-  } catch(e) {
+  } catch (e) {
     showToast('Network error', 'error');
   }
 }

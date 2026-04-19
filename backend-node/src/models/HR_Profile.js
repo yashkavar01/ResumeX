@@ -11,6 +11,11 @@ module.exports = (sequelize) => {
     },
     companyName: { type: DataTypes.STRING, allowNull: false },
     position: { type: DataTypes.STRING },
+    firstName: { type: DataTypes.STRING },
+    lastName: { type: DataTypes.STRING },
+    phone: { type: DataTypes.STRING },
+    location: { type: DataTypes.STRING },
+    bio: { type: DataTypes.TEXT },
     linkedInUrl: { type: DataTypes.STRING },
     verificationStatus: { type: DataTypes.ENUM('pending', 'approved', 'rejected'), defaultValue: 'pending' }
   }, {

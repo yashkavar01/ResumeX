@@ -119,6 +119,27 @@ ul { list-style: none; }
 .btn-outline.btn-lg { padding: 13px 28px; font-size: 15px; border-radius: 12px; }
 .btn-outline.btn-full { width: 100%; justify-content: center; }
 
+.btn-outline-danger {
+  background: transparent;
+  color: #f87171;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: var(--transition);
+}
+.btn-outline-danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+  color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
 .btn-ghost {
   background: transparent;
   color: var(--muted);
@@ -1193,4 +1214,98 @@ ul#audit-red-flags li, ul#audit-strengths li {
 .text-area {
   resize: vertical;
   min-height: 100px;
+}
+
+/* ----- MODAL SYSTEM ----- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+  display: flex !important;
+  opacity: 1;
+}
+
+.modal-content {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 550px;
+  padding: 30px;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-overlay.active .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  margin: 0;
+  color: var(--accent);
+}
+
+.modal-close {
+  background: transparent;
+  color: var(--muted);
+  font-size: 24px;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: var(--txt);
+}
+
+.modal-body {
+  margin-bottom: 25px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.case-study-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--accent2);
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.case-study-answer-box {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    border-left: 3px solid var(--accent);
 }

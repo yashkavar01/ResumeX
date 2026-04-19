@@ -91,9 +91,11 @@ const applyToJob = async (req, res) => {
             return res.status(400).json({ error: 'You have already applied for this job' });
         }
 
+        const { caseStudyAnswer } = req.body;
         const application = await Job_Application.create({
             studentId: student.id,
-            jobId
+            jobId,
+            caseStudyAnswer
         });
 
         res.status(201).json({ message: 'Applied successfully', data: application });
@@ -150,4 +152,31 @@ const tailorResumeForJob = async (req, res) => {
     }
 };
 
-module.exports = { getDashboard, getAvailableJobs, tailorResumeForJob, applyToJob };
+const getJobById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const job = await Job.findByPk(id, {
+            include: [
+                { model: Skill, attributes: ['name'] },
+                { model: HR_Profile, attributes: ['companyName'] }
+            ]
+        });
+
+        if (!job) {
+            return res.status(404).json({ error: 'Job not found' });
+        }
+
+        res.json({ data: job });
+    } catch (error) {
+        console.error('Error fetching job details:', error);
+        res.status(500).json({ error: 'Failed to fetch job details' });
+    }
+};
+
+module.exports = {
+  getDashboard,
+  getAvailableJobs,
+  applyToJob,
+  tailorResumeForJob,
+  getJobById
+};

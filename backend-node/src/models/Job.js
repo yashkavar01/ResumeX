@@ -11,6 +11,7 @@ module.exports = (sequelize) => {
     },
     title: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT },
+    caseStudyQuestion: { type: DataTypes.TEXT, allowNull: true },
   }, {
     tableName: 'jobs',
     timestamps: true

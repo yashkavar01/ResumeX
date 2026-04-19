@@ -15,7 +15,7 @@ const authMiddleware = require('./src/middleware/auth');
 const adminMiddleware = require('./src/middleware/admin');
 
 const app = express();
-const PORT = process.env.PORT || 8005;
+const PORT = process.env.PORT || 8010;
 
 // Middleware
 app.use(cors());
@@ -31,13 +31,18 @@ app.use((req, res, next) => {
 const upload = multer({ dest: 'uploads/' });
 
 // Public API Endpoints
+app.get('/check', (req, res) => res.json({ status: 'alive', port: 8010, time: new Date().toISOString() }));
 app.get('/ping', (req, res) => res.send('pong'));
 app.post('/register', authController.register);
 app.post('/login', upload.none(), authController.login); // Multer `.none()` parses FormData texts
+app.post('/auth/forgot-password', authController.forgotPassword);
+app.post('/auth/verify-otp', authController.verifyOTP);
+app.post('/auth/reset-password', authController.resetPassword);
 
 // Protected API Endpoints
 app.get('/dashboard', authMiddleware, dashboardController.getDashboard);
 app.get('/student/jobs', authMiddleware, dashboardController.getAvailableJobs);
+app.get('/student/job/:id', authMiddleware, dashboardController.getJobById);
 app.post('/student/apply/:jobId', authMiddleware, dashboardController.applyToJob);
 app.post('/student/tailor-resume/:jobId', authMiddleware, dashboardController.tailorResumeForJob);
 app.post('/analyze', authMiddleware, upload.single('resume'), resumeController.analyzeResume);
@@ -48,6 +53,7 @@ app.get('/recommendations/:studentId', authMiddleware, recommendationController.
 // Profile Endpoints
 app.get('/profile', authMiddleware, profileController.getProfile);
 app.put('/profile', authMiddleware, profileController.updateProfile);
+app.delete('/profile', authMiddleware, profileController.deleteProfile);
 
 // Notifications
 app.get('/notifications', authMiddleware, notificationController.getNotifications);

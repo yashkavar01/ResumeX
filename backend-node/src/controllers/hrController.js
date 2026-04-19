@@ -5,20 +5,22 @@ const { runAiTask } = require('../services/resumeService');
 const postJob = async (req, res) => {
     try {
         const userId = req.user.sub;
-        const { title, description, required_skills } = req.body;
+        const { title, description, required_skills, caseStudyQuestion } = req.body;
+        console.log('Post Job Request Received:', { title, caseStudyQuestion });
 
         if (!title || !required_skills || !Array.isArray(required_skills)) {
-            return res.status(400).json({ error: 'Missing title or required_skills array' });
+            return res.status(400).json({ detail: 'Missing title or required_skills array' });
         }
 
         const hrProfile = await HR_Profile.findOne({ where: { userId } });
         if (!hrProfile || hrProfile.verificationStatus !== 'approved') {
-            return res.status(403).json({ error: 'Only approved HRs can post jobs' });
+            return res.status(403).json({ detail: 'Only approved HRs can post jobs' });
         }
 
         const job = await Job.create({
             title,
             description,
+            caseStudyQuestion,
             hrId: hrProfile.id
         });
 
@@ -31,7 +33,7 @@ const postJob = async (req, res) => {
         res.status(201).json({ message: 'Job posted successfully', data: job });
     } catch (e) {
         console.error(e);
-        res.status(500).json({ error: 'Server error posting job' });
+        res.status(500).json({ detail: 'Server error posting job' });
     }
 };
 
@@ -41,7 +43,7 @@ const getMyJobs = async (req, res) => {
         
         const hrProfile = await HR_Profile.findOne({ where: { userId } });
         if (!hrProfile) {
-            return res.status(403).json({ error: 'HR Profile not found' });
+            return res.status(403).json({ detail: 'HR Profile not found' });
         }
 
         const jobs = await Job.findAll({
@@ -52,7 +54,7 @@ const getMyJobs = async (req, res) => {
         res.json({ data: jobs });
     } catch (e) {
         console.error(e);
-        res.status(500).json({ error: 'Server error fetching jobs' });
+        res.status(500).json({ detail: 'Server error fetching jobs' });
     }
 };
 
@@ -89,7 +91,7 @@ const searchTalent = async (req, res) => {
         res.json({ data: resumes });
     } catch (e) {
         console.error(e);
-        res.status(500).json({ error: 'Server error searching talent' });
+        res.status(500).json({ detail: 'Server error searching talent' });
     }
 };
 
@@ -97,7 +99,7 @@ const getJobApplicants = async (req, res) => {
     try {
         const userId = req.user.sub;
         const hrProfile = await HR_Profile.findOne({ where: { userId } });
-        if (!hrProfile) return res.status(404).json({ error: 'HR profile not found' });
+        if (!hrProfile) return res.status(404).json({ detail: 'HR profile not found' });
 
         const applicants = await Job_Application.findAll({
             include: [
@@ -118,7 +120,7 @@ const getJobApplicants = async (req, res) => {
         res.json({ data: applicants });
     } catch (e) {
         console.error('Error fetching applicants:', e);
-        res.status(500).json({ error: 'Failed to fetch applicants' });
+        res.status(500).json({ detail: 'Failed to fetch applicants' });
     }
 };
 
@@ -129,15 +131,15 @@ const updateApplicationStatus = async (req, res) => {
         const userId = req.user.sub;
 
         const hrProfile = await HR_Profile.findOne({ where: { userId } });
-        if (!hrProfile) return res.status(404).json({ error: 'HR profile not found' });
+        if (!hrProfile) return res.status(404).json({ detail: 'HR profile not found' });
 
         const application = await Job_Application.findByPk(id, {
             include: [{ model: Job }]
         });
 
-        if (!application) return res.status(404).json({ error: 'Application not found' });
+        if (!application) return res.status(404).json({ detail: 'Application not found' });
         if (application.Job.hrId !== hrProfile.id) {
-            return res.status(403).json({ error: 'Unauthorized to manage this application' });
+            return res.status(403).json({ detail: 'Unauthorized to manage this application' });
         }
 
         application.status = status;
@@ -175,7 +177,7 @@ const updateApplicationStatus = async (req, res) => {
         res.json({ message: `Application ${status} successfully`, data: application });
     } catch (e) {
         console.error('Error updating application status:', e);
-        res.status(500).json({ error: 'Failed to update application status' });
+        res.status(500).json({ detail: 'Failed to update application status' });
     }
 };
 
@@ -183,7 +185,7 @@ const getShortlistedCandidates = async (req, res) => {
     try {
         const userId = req.user.sub;
         const hrProfile = await HR_Profile.findOne({ where: { userId } });
-        if (!hrProfile) return res.status(404).json({ error: 'HR profile not found' });
+        if (!hrProfile) return res.status(404).json({ detail: 'HR profile not found' });
 
         const shortlisted = await Job_Application.findAll({
             include: [
@@ -204,7 +206,7 @@ const getShortlistedCandidates = async (req, res) => {
         res.json({ data: shortlisted });
     } catch (e) {
         console.error('Error fetching shortlisted candidates:', e);
-        res.status(500).json({ error: 'Failed to fetch shortlisted candidates' });
+        res.status(500).json({ detail: 'Failed to fetch shortlisted candidates' });
     }
 };
 
@@ -214,7 +216,7 @@ const getTopCandidatesForJob = async (req, res) => {
 
         const job = await Job.findByPk(jobId, { include: [Skill] });
         if (!job) {
-            return res.status(404).json({ error: 'Job not found' });
+            return res.status(404).json({ detail: 'Job not found' });
         }
 
         const jobSkills = job.Skills.map(s => s.name.toLowerCase());
@@ -247,7 +249,7 @@ const getTopCandidatesForJob = async (req, res) => {
             topCandidates = await runAiTask(prompt);
         } catch (err) {
             console.error('Error running AI matchmaker:', err.message);
-            return res.status(500).json({ error: 'AI matchmaking failed after multiple attempts.' });
+            return res.status(500).json({ detail: 'AI matchmaking failed after multiple attempts.' });
         }
 
         res.json({
@@ -257,7 +259,7 @@ const getTopCandidatesForJob = async (req, res) => {
 
     } catch (e) {
         console.error('Error running AI matchmaker:', e);
-        res.status(500).json({ error: 'Failed to evaluate top candidates' });
+        res.status(500).json({ detail: 'Failed to evaluate top candidates' });
     }
 };
 

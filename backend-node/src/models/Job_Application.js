@@ -18,7 +18,8 @@ module.exports = (sequelize) => {
     status: {
       type: DataTypes.ENUM('pending', 'shortlisted', 'rejected'),
       defaultValue: 'pending'
-    }
+    },
+    caseStudyAnswer: { type: DataTypes.TEXT, allowNull: true },
   }, {
     tableName: 'job_applications',
     timestamps: true

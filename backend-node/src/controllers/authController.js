@@ -104,4 +104,71 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const { sendOTPEmail } = require('../services/emailService');
+
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ where: { email } });
+
+        if (!user) {
+            return res.status(404).json({ detail: 'User with this email not found' });
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        user.resetOTP = otp;
+        user.resetOTPExpires = otpExpires;
+        await user.save();
+
+        // Send Email
+        await sendOTPEmail(email, otp);
+
+        res.json({ message: 'OTP sent to your email' });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ detail: 'Failed to send OTP' });
+    }
+};
+
+const verifyOTP = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        const user = await User.findOne({ where: { email, resetOTP: otp } });
+
+        if (!user || user.resetOTPExpires < new Date()) {
+            return res.status(400).json({ detail: 'Invalid or expired OTP' });
+        }
+
+        res.json({ message: 'OTP verified successfully' });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ detail: 'Verification failed' });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+        const user = await User.findOne({ where: { email, resetOTP: otp } });
+
+        if (!user || user.resetOTPExpires < new Date()) {
+            return res.status(400).json({ detail: 'Invalid or expired OTP' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        user.resetOTP = null;
+        user.resetOTPExpires = null;
+        await user.save();
+
+        res.json({ message: 'Password reset successfully. You can now login.' });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ detail: 'Password reset failed' });
+    }
+};
+
+module.exports = { register, login, forgotPassword, verifyOTP, resetPassword };

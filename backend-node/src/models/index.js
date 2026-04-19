@@ -25,19 +25,19 @@ const Job_Application = require('./Job_Application')(sequelize);
 const Notification = require('./Notification')(sequelize);
 
 // Associations
-User.hasOne(Student, { foreignKey: 'userId', as: 'studentProfile' });
+User.hasOne(Student, { foreignKey: 'userId', as: 'studentProfile', onDelete: 'CASCADE' });
 Student.belongsTo(User, { foreignKey: 'userId' });
 
-User.hasOne(HR_Profile, { foreignKey: 'userId', as: 'hrProfile' });
+User.hasOne(HR_Profile, { foreignKey: 'userId', as: 'hrProfile', onDelete: 'CASCADE' });
 HR_Profile.belongsTo(User, { foreignKey: 'userId' });
 
-User.hasMany(Notification, { foreignKey: 'userId' });
+User.hasMany(Notification, { foreignKey: 'userId', onDelete: 'CASCADE' });
 Notification.belongsTo(User, { foreignKey: 'userId' });
 
-Student.hasMany(Resume, { foreignKey: 'studentId' });
+Student.hasMany(Resume, { foreignKey: 'studentId', onDelete: 'CASCADE' });
 Resume.belongsTo(Student, { foreignKey: 'studentId' });
 
-HR_Profile.hasMany(Job, { foreignKey: 'hrId' });
+HR_Profile.hasMany(Job, { foreignKey: 'hrId', onDelete: 'CASCADE' });
 Job.belongsTo(HR_Profile, { foreignKey: 'hrId' });
 
 // Junction tables for N:M relationships
@@ -48,17 +48,17 @@ Job.belongsToMany(Skill, { through: 'Job_Skills', foreignKey: 'jobId', otherKey:
 Skill.belongsToMany(Job, { through: 'Job_Skills', foreignKey: 'skillId', otherKey: 'jobId' });
 
 // Matches
-Student.hasMany(Job_Matches, { foreignKey: 'studentId' });
+Student.hasMany(Job_Matches, { foreignKey: 'studentId', onDelete: 'CASCADE' });
 Job_Matches.belongsTo(Student, { foreignKey: 'studentId' });
 
-Job.hasMany(Job_Matches, { foreignKey: 'jobId' });
+Job.hasMany(Job_Matches, { foreignKey: 'jobId', onDelete: 'CASCADE' });
 Job_Matches.belongsTo(Job, { foreignKey: 'jobId' });
 
 // Applications
-Student.hasMany(Job_Application, { foreignKey: 'studentId' });
+Student.hasMany(Job_Application, { foreignKey: 'studentId', onDelete: 'CASCADE' });
 Job_Application.belongsTo(Student, { foreignKey: 'studentId' });
 
-Job.hasMany(Job_Application, { foreignKey: 'jobId' });
+Job.hasMany(Job_Application, { foreignKey: 'jobId', onDelete: 'CASCADE' });
 Job_Application.belongsTo(Job, { foreignKey: 'jobId' });
 
 module.exports = {
